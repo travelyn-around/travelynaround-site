@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Travelyn Around | Wandering around the earth</title>
+<meta name="description" content="Maps and photo albums from wandering around the earth.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&display=swap" rel="stylesheet">
+<style>
+  :root { --sky:#cdeeea; --sun:#fff3cf; --ink:#12343b; --deep:#0c4a56; --coral:#ee5a3c; --gold:#f2b632; --muted:#47666c; }
+  * { box-sizing:border-box; }
+  body { margin:0; color:var(--ink); font:1.05rem/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; background:linear-gradient(180deg,var(--sky) 0%,#eaf7f2 45%,var(--sun) 100%) fixed; }
+  h1, h2 { font-family:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif; line-height:1.05; margin:0; }
+  main { max-width:760px; margin:0 auto; padding:56px 20px 40px; }
+  .hero h1 { font-size:clamp(2.8rem, 11vw, 5.2rem); font-weight:800; letter-spacing:-.02em; color:var(--deep); }
+  .hero p { max-width:30em; margin:16px 0 0; font-size:1.2rem; color:var(--muted); }
+
+  /* the route: a dashed line that draws itself once when the page loads */
+  .trail { position:relative; margin-top:56px; padding-left:64px; }
+  .trail::before { content:""; position:absolute; left:19px; top:14px; bottom:30px; width:4px;
+    background:repeating-linear-gradient(to bottom, var(--coral) 0 10px, transparent 10px 20px); border-radius:2px;
+    animation:draw 1.8s ease-out both; }
+  @keyframes draw { from { clip-path:inset(0 0 100% 0); } to { clip-path:inset(0); } }
+  @media (prefers-reduced-motion: reduce) { .trail::before { animation:none; } }
+
+  .stop { position:relative; margin-bottom:52px; }
+  .stop::before { content:attr(data-icon); position:absolute; left:-64px; top:-4px; width:42px; height:42px; border-radius:50%;
+    background:#fff; border:3px solid var(--coral); display:grid; place-items:center; font-size:1.25rem; }
+  .stop h2 { font-size:clamp(1.6rem, 5vw, 2.2rem); font-weight:800; color:var(--deep); }
+  .stop p { margin:8px 0 0; max-width:34em; }
+  .go { display:inline-block; margin-top:14px; padding:10px 20px; border-radius:999px; background:var(--deep); color:#fff; text-decoration:none; font-weight:700; }
+  .go:hover { background:var(--coral); }
+  a:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+
+  footer { max-width:760px; margin:0 auto; padding:0 20px 40px; color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <h1>Travelyn Around</h1>
+    <p>Wandering around the earth and collecting the neat things found along the way.</p>
+  </section>
+
+  <!--
+    HOW TO EDIT: each place on the route is one <section class="stop"> block below.
+    To add one, copy a whole block, paste it where you want it, and change the icon, heading, text and link.
+  -->
+  <div class="trail">
+
+    <section class="stop" data-icon="🎄">
+      <h2>Now open: Calgary Christmas markets 2026</h2>
+      <p>A map of Christmas markets in Calgary and the towns around it, with dates, prices and directions.</p>
+      <a class="go" href="/calgary-christmas-markets-2026/">See the map</a>
+    </section>
+
+    <section class="stop" data-icon="📍">
+      <h2>The travel album</h2>
+      <p>Photo albums from trips, pinned to a map of the world.</p>
+      <a class="go" href="https://personal-travel-map-phi.vercel.app/travelynaround">Open the album</a>
+    </section>
+
+    <section class="stop" data-icon="✈️">
+      <h2>Next stop</h2>
+      <p>More maps, albums and finds are on the way.</p>
+    </section>
+
+  </div>
+</main>
+<footer>© <span id="yr"></span> Travelyn Around</footer>
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
