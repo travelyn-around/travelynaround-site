@@ -107,13 +107,13 @@
     <p id="mHint">Send me a link and I'll add it to the map.</p>
     <label for="mType">What would you like to tell me?</label>
     <select id="mType"><option value="missing">A market is missing</option><option value="error">There is an error on the map</option></select>
-    <label for="mName">Market name (optional)</label>
+    <label for="mName">Market name</label>
     <input id="mName" type="text">
-    <label for="mLink" id="mLinkLabel">Link to the market (required)</label>
+    <label for="mLink" id="mLinkLabel">Link to the market *</label>
     <input id="mLink" type="text" placeholder="https://...">
-    <label for="mDetails" id="mDetailsLabel">Anything else I should know? (optional)</label>
+    <label for="mDetails" id="mDetailsLabel">Anything else I should know?</label>
     <textarea id="mDetails" rows="3"></textarea>
-    <label for="mFrom">Your email, if you'd like a reply (optional)</label>
+    <label for="mFrom">Your email, if you'd like a reply</label>
     <input id="mFrom" type="text">
     <div id="formMsg"></div>
     <div class="row"><button class="btn cancel" id="mCancel">Cancel</button><button class="btn send" id="mSend">Send</button></div>
@@ -134,54 +134,55 @@ const R = (a, b) => { const o = []; for (let d = new Date(a + 'T12:00'); d <= ne
 //   cost:  type anything. If the word "free" appears anywhere in it, the market shows under the Free only button.
 //   free:  (optional) free:true forces a market into Free only, free:false keeps it out. Leave it off to let the word "free" in cost decide.
 //   map:   (optional) what Google Maps should search for when someone clicks the location, e.g. map:"226066 112 St W, Foothills County, AB". Leave it off to use the place text.
+//   start / end: (optional) 24-hour times like start:"10:00", end:"16:00". Used only for the calendar link, only when every day has the same hours. Leave off for all-day.
 //   note:  (optional) extra words shown after the dates, e.g. note:"other days may follow"
 // The date line on each card, the date buttons and the sorting all come from "dates", so that is the one to keep right.
 const MARKETS = [
-  { name:"Millarville Christmas Market", time:"10 AM – 5 PM", dates:[...R('2026-11-05','2026-11-08'),...R('2026-11-12','2026-11-15')], cost:"$8 (ages 12+), free under 12", free:false, 
+  { name:"Millarville Christmas Market", time:"10 AM – 5 PM", start:"10:00", end:"17:00", dates:[...R('2026-11-05','2026-11-08'),...R('2026-11-12','2026-11-15')], cost:"$8 (ages 12+), free under 12", free:false, 
     place:"Millarville Racing & Agricultural Society, 306097 192 St W", lat:50.895, lng:-114.35, url:"https://millarvilleracetrack.com/annual-christmas-market/" },
-  { name:"Bowness Christmas Market", time:"10 AM – 4 PM", dates:['2026-11-07'], cost:"Free",
+  { name:"Bowness Christmas Market", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:['2026-11-07'], cost:"Free",
     place:"Bowness Community Association, 7904 43 Ave NW", lat:51.0867, lng:-114.2063, url:"https://www.eventbrite.ca/e/bowness-christmas-market-tickets-1999006545389" },
-  { name:"Inglewood Holiday Night Market", time:"4 – 9 PM", dates:['2026-11-13','2026-11-14','2026-11-20','2026-11-21','2026-11-27','2026-11-28'], cost:"$5 (free for seniors 65+ and kids under 12)",
+  { name:"Inglewood Holiday Night Market", time:"4 – 9 PM", start:"16:00", end:"21:00", dates:['2026-11-13','2026-11-14','2026-11-20','2026-11-21','2026-11-27','2026-11-28'], cost:"$5 (free for seniors 65+ and kids under 12)",
     place:"The Quonset at Crossroads Market, 1235 26 Ave SE", lat:51.0278, lng:-114.04, url:"https://www.inglewoodnightmarket.ca/" },
-  { name:"Grand South Christmas Market", time:"10 AM – 4 PM", dates:['2026-11-14'], cost:"Not listed",
+  { name:"Grand South Christmas Market", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:['2026-11-14'], cost:"Not listed",
     place:"Mahogany Beach Club, 29 Masters Park SE", lat:50.895415, lng:-113.9268715, url:"https://happeningnext.com/event/the-grand-south-christmas-market-eid3a0dtchhxc" },
   { name:"Spruce Meadows International Christmas Market", time:"See website", dates:[...R('2026-11-13','2026-11-15'),...R('2026-11-20','2026-11-22'),...R('2026-11-27','2026-11-29'),...R('2026-12-04','2026-12-06')], cost:"From $18",
     place:"18011 Spruce Meadows Way SW", lat:50.866, lng:-114.297, url:"https://www.sprucemeadows.com/christmasmarket/" },
   { name:"Calgary Winter Market", time:"Mon-Sat 11:00 AM - 9:00 PM, Sun 11:00 AM - 6:00 PM, Dec. 24 11:00 AM - 3:00 PM", dates:[...R('2026-11-19','2026-11-22'),...R('2026-11-26','2026-11-29'),...R('2026-12-03','2026-12-06'),...R('2026-12-10','2026-12-13'),...R('2026-12-15','2026-12-24')], free:true, cost:"$10 (free before 5 PM daily, Sundays, Dec 24, under 18 and 65+)",
     place:"Eau Claire Plaza, 139 Barclay Parade SW", lat:51.051, lng:-114.072, url:"https://calgarywintermarket.ca/" },
-  { name:"Glenbrook Makers Market", time:"10 AM – 4 PM", dates:['2026-11-21'], cost:"Free",
+  { name:"Glenbrook Makers Market", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:['2026-11-21'], cost:"Free",
     place:"Glenbrook Community Association, 3524 45 St SW", lat:51.0215, lng:-114.164, url:"https://www.eventbrite.ca/e/glenbrook-makers-market-2026-tickets-2000280032423" },
-  { name:"Dalhousie Christmas Craft Market", time:"10 AM – 3 PM", dates:['2026-11-21'], cost:"Free",
+  { name:"Dalhousie Christmas Craft Market", time:"10 AM – 3 PM", start:"10:00", end:"15:00", dates:['2026-11-21'], cost:"Free",
     place:"Dalhousie Community Association, 5432 Dalhart Rd NW", lat:51.103, lng:-114.163, url:"https://www.dalhousiecalgary.ca/events/christmas-craft-market/" },
-  { name:"U/D Night Market", time:"5 – 9 PM", dates:['2026-11-26'], cost:"Free",
+  { name:"U/D Night Market", time:"5 – 9 PM", start:"17:00", end:"21:00", dates:['2026-11-26'], cost:"Free",
     place:"Central Commons Park, University District", lat:51.077634, lng:-114.144381, url:"https://myuniversitydistrict.ca/night-market-holiday/" },
-  { name:"Granary Road Christmas Market", time:"10 AM – 4 PM", dates:[...R('2026-11-28','2026-11-29'),...R('2026-12-05','2026-12-06'),...R('2026-12-12','2026-12-13')], cost:"From $10",
+  { name:"Granary Road Christmas Market", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:[...R('2026-11-28','2026-11-29'),...R('2026-12-05','2026-12-06'),...R('2026-12-12','2026-12-13')], cost:"From $10",
     place:"Granary Road, 226066 112 St W", lat:50.846279, lng:-114.1880487, url:"https://www.granaryroad.com/christmas-market" },
-  { name:"The Barn Artisan Christmas Market", time:"11 AM – 4 PM", dates:['2026-11-29'], cost:"Free with donation to Food Bank",
+  { name:"The Barn Artisan Christmas Market", time:"11 AM – 4 PM", start:"11:00", end:"16:00", dates:['2026-11-29'], cost:"Free with donation to Food Bank",
     place:"The Shawnessy Barn, 224 Shawmeadows Rd SW", lat:50.9137, lng:-114.0728, url:"https://allevents.in/calgary/the-barn-artisan-market-presents-the-christmas-market-tickets/80004216424065" },
   { name:"Okotoks Christmas Market", time:"Fri 4 PM - 8PM, Sat & Sun 9 AM - 4 PM", dates:[...R('2026-11-06','2026-11-07'),...R('2026-11-13','2026-11-15')], cost:"From $5",
     place:"Okotoks: Viking Rentals Centre, 204 Community Way & D'Arcy Ranch Golf Club", lat:50.7305, lng:-113.979, url:"https://www.themarketsquare.ca/events/2026-okotoks-christmas-market-2026-11-06-15-00-1" },
-  { name:"Chestermere Christmas Market", time:"10 AM – 3 PM", dates:R('2026-12-12','2026-12-13'), cost:"Free with donation to Veteran Food Bank",
+  { name:"Chestermere Christmas Market", time:"10 AM – 3 PM", start:"10:00", end:"15:00", dates:R('2026-12-12','2026-12-13'), cost:"Free with donation to Veteran Food Bank",
     place:"Chestermere: Rec Centre MPP Hall, 201 W Chestermere Dr", lat:51.0391, lng:-113.8225, url:"https://www.facebook.com/events/1040608962237679" },
   { name:"Strathmore Farmers Market Weekend", time:"Sat 11 AM – 5 PM, Sun 10 AM – 3 PM", dates:R('2026-11-28','2026-11-29'), cost:"Not listed",
     place:"Strathmore: Motor Products Sports Centre, 1150 Edgeview Rd", lat:51.045, lng:-113.39, url:"https://www.facebook.com/events/1773569470523964/" },
-  { name:"Strathmore Homebody Christmas Market", time:"Sat 10 AM – 4 PM", dates:['2026-11-21'], cost:"Free",
+  { name:"Strathmore Homebody Christmas Market", time:"Sat 10 AM – 4 PM", start:"10:00", end:"16:00", dates:['2026-11-21'], cost:"Free",
     place:"Strathmore: Motor Products Sports Centre, 1150 Edgeview Rd", lat:51.045, lng:-113.39, url:"https://www.facebook.com/events/1848478133163960/" },
-  { name:"Strathmore Library Holiday Market", time:"10 AM – 2 PM", dates:['2026-11-28'], cost:"Not listed",
+  { name:"Strathmore Library Holiday Market", time:"10 AM – 2 PM", start:"10:00", end:"14:00", dates:['2026-11-28'], cost:"Not listed",
     place:"Strathmore Municipal Library", lat:51.0395, lng:-113.401, url:"https://www.facebook.com/strathmorelibrary/posts/986818781115287:986818781115287" },
-  { name:"Vintage & Vines Christmas Market", time:"11 AM – 5 PM", dates:['2026-11-28'], cost:"Not listed",
+  { name:"Vintage & Vines Christmas Market", time:"11 AM – 5 PM", start:"11:00", end:"17:00", dates:['2026-11-28'], cost:"Not listed",
     place:"Strathmore Civic Centre", lat:51.0388, lng:-113.398, url:"https://www.facebook.com/events/1398516424609380" },
-  { name:"Christmas Pottery Market (Cochrane)", time:"10 AM – 4 PM", dates:R('2026-11-14','2026-11-15'), cost:"Free",
+  { name:"Christmas Pottery Market (Cochrane)", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:R('2026-11-14','2026-11-15'), cost:"Free",
     place:"Cochrane: Saffron Pottery Studio, 205 3rd Ave W", lat:51.1893, lng:-114.472, url:"https://cochranetourism.ca/single-event/saffron-pottery-studios-christmas-market-3b01aa95-a268-4578-a647-f7c67f63024e/" },
-  { name:"The Cochrane Christmas Market", time:"10 AM – 4 PM", dates:['2026-11-15'], cost:"$4 (Free under 12 years)", free:false, 
+  { name:"The Cochrane Christmas Market", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:['2026-11-15'], cost:"$4 (Free under 12 years)", free:false, 
     place:"Cochrane Ranche House", lat:51.2023178, lng:-114.4766615, url:"https://www.facebook.com/CochraneChristmasMarket" },
-  { name:"Cochrane Christmas Farmers Market", time:"10 AM – 4 PM", dates:R('2026-12-12','2026-12-13'), cost:"Free",
+  { name:"Cochrane Christmas Farmers Market", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:R('2026-12-12','2026-12-13'), cost:"Free",
     place:"Cochrane: 800 Griffin Rd E", lat:51.1756601, lng:-114.4519879, url:"https://www.facebook.com/events/1174120861845827/" },
-  { name:"Cochrane Lions Christmas Market", time:"10 AM - 4 PM", dates:['2026-11-28', '2026-11-29'], cost:"Free",
+  { name:"Cochrane Lions Christmas Market", time:"10 AM - 4 PM", start:"10:00", end:"16:00", dates:['2026-11-28', '2026-11-29'], cost:"Free",
     place:"Cochrane Lions Event Centre, 109 5th Ave", lat:51.189, lng:-114.47, url:"https://eventscentre.ca/markets/cochrane-christmas-market/" },
   { name:"Banff Christmas Market", time:"Varies (mostly 10 AM – 8 PM)", dates:[...R('2026-11-19','2026-11-22'),...R('2026-11-27','2026-11-29'),...R('2026-12-04','2026-12-06'),...R('2026-12-11','2026-12-13')], cost:"Ticketed",
     place:"Banff Heritage Train Station", lat:51.176, lng:-115.57, url:"https://banffchristmasmarket.com/" },
-  { name:"Canmore Christmas Artisans' Market", time:"10 AM – 4 PM", dates:R('2026-11-21','2026-11-22'), cost:"$5 entry",
+  { name:"Canmore Christmas Artisans' Market", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:R('2026-11-21','2026-11-22'), cost:"$5 entry",
     place:"Canmore Recreation Centre, 1900 8 Ave", lat:51.0886, lng:-115.3469, url:"https://www.facebook.com/CanmoreChristmasArtisansMarket" },
   { name:"Crossfield Farmers' Market Christmas Market", time:"Fri 5 – 9 PM, Sat 10 AM – 4 PM", dates:R('2026-11-06','2026-11-07'), cost:"Not listed",
     place:"Crossfield: 4 venues, incl. Community Centre", lat:51.433, lng:-114.027, url:"https://www.facebook.com/events/1595563102306038" },
@@ -189,17 +190,17 @@ const MARKETS = [
     place:"Carstairs Community Hall, 1100 Lackner Way", lat:51.564, lng:-114.097, url:"https://www.facebook.com/events/1504386490809493" },
   { name:"Redwood Meadows Christmas Market", time:"10 AM – 5 PM (Sun until 4)", dates:R('2026-11-21','2026-11-22'), cost:"Not listed",
     place:"1 Manyhorses Dr, Redwood Meadows", lat:50.9884687, lng:-114.5022905, url:"https://www.facebook.com/events/1887168459575496" },
-  { name:"Weihnachtsmarkt Christmas Market", time:"10 AM – 1 PM", dates:R('2026-11-28','2026-11-29'), cost:"Free with donation",
+  { name:"Weihnachtsmarkt Christmas Market", time:"10 AM – 1 PM", start:"10:00", end:"13:00", dates:R('2026-11-28','2026-11-29'), cost:"Free with donation",
     place:"260 Century Downs Dr, Balzac", lat:51.2013266, lng:-113.9805532, url:"https://www.facebook.com/events/1054293574080813" },
   { name:"Airdrie Farmers' Market Christmas Markets", time:"Fri 10 AM – 7 PM, Sat 10 AM – 4 PM", dates:[...R('2026-11-06','2026-11-07'),'2026-12-05'], cost:"Free, donation to Food Bank",
     place:"Airdrie Town & Country Centre, 275 Jensen Dr NE", lat:51.301, lng:-114.001, url:"https://www.facebook.com/events/1104802188723298" },
-  { name:"Touch of Christmas Market (Olds)", time:"10 AM – 4 PM", dates:R('2026-11-07','2026-11-08'), cost:"Free",
+  { name:"Touch of Christmas Market (Olds)", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:R('2026-11-07','2026-11-08'), cost:"Free",
     place:"Future Ag Event Centre, 5166 52 Street, Olds", lat:51.792, lng:-114.109, url:"https://www.olds.ca/recreation-culture-events/events/annual-events/olds-fashioned-christmas/#TouchofChristmasMarket" },
   { name:"Wonderland Christmas Market (Olds)", time:"Fri 5 – 9 PM, Sat 10 AM – 4 PM", dates:R('2026-11-13','2026-11-14'), cost:"Not listed",
     place:"Future Ag Event Centre (formerly Cow Palace), Olds", lat:51.7925, lng:-114.1085, url:"https://www.facebook.com/events/1040018738956027" },
-  { name:"Santa Paws Christmas Market (Strathmore) - Pet-friendly", time:"10 AM – 5 PM", dates:['2026-12-05','2026-12-06'], cost:"Free with donation",
+  { name:"Santa Paws Christmas Market (Strathmore) - Pet-friendly", time:"10 AM – 5 PM", start:"10:00", end:"17:00", dates:['2026-12-05','2026-12-06'], cost:"Free with donation",
     place:"Strathmore Civic Centre 120 Brent Boulevard, Strathmore, Alberta, Canada", lat:51.0388, lng:-113.398, url:"https://allevents.in/strathmore/santa-paws-2026/200030571500630" },
-  { name:"Distinctly Nanton Christmas Market", time:"10 AM – 4 PM", dates:['2026-11-28'], cost:"Not listed",
+  { name:"Distinctly Nanton Christmas Market", time:"10 AM – 4 PM", start:"10:00", end:"16:00", dates:['2026-11-28'], cost:"Not listed",
     place:"Nanton Community Centre", lat:50.3485, lng:-113.7655, url:"https://www.facebook.com/people/Distinctly-Nanton-Christmas-Market/100057252947702/" },
   { name:"High River Winter Market", time:"Fri 2 PM - 9 PM, Sat 10 AM - 4 PM", dates:['2026-12-04','2026-12-05'], cost:"$5, free under 16 years",
     place:"Highwood Centre, High River", lat:50.581, lng:-113.875, url:"https://www.inclusionfoothills.org/events/winter-market" },
@@ -234,8 +235,35 @@ function nextDate(m) {
   return m.dates.filter(d => d >= lo && d <= range.to).sort()[0] || '9999';
 }
 const matchesQuery = m => !query || (m.name + ' ' + m.place + ' ' + whenText(m)).toLowerCase().includes(query);
+// Builds a one-click "Add to Google Calendar" link for the next upcoming run of days
+function calendarLink(m) {
+  const today = iso(new Date());
+  const days = [...new Set(m.dates)].sort();
+  const runs = [];
+  days.forEach(d => {
+    const last = runs[runs.length - 1];
+    if (last && iso(addDays(new Date(last.end + 'T12:00'), 1)) === d) last.end = d; else runs.push({ start: d, end: d });
+  });
+  const run = runs.find(r => r.end >= today);
+  if (!run) return '';
+  const compact = s => s.replace(/-/g, '');
+  const endExclusive = compact(iso(addDays(new Date(run.end + 'T12:00'), 1)));
+  const details = 'Dates: ' + whenText(m) + '\nHours: ' + m.time + '\nCost: ' + m.cost + '\nOfficial page: ' + m.url + '\n(Dates and hours can change, so check the official page.)';
+  let when = compact(run.start) + '/' + endExclusive, extra = '';
+  if (m.start && m.end) {
+    const nDays = Math.round((new Date(run.end + 'T12:00') - new Date(run.start + 'T12:00')) / 864e5) + 1;
+    when = compact(run.start) + 'T' + m.start.replace(':', '') + '00/' + compact(run.start) + 'T' + m.end.replace(':', '') + '00';
+    extra = '&ctz=America/Edmonton' + (nDays > 1 ? '&recur=' + encodeURIComponent('RRULE:FREQ=DAILY;COUNT=' + nDays) : '');
+  }
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text=' + encodeURIComponent(m.name)
+    + '&dates=' + when + extra
+    + '&details=' + encodeURIComponent(details)
+    + '&location=' + encodeURIComponent(m.map || (m.place + ', Alberta'));
+}
+const calLink = (m, label) => { const u = calendarLink(m); return u ? `<a href="${u}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${label}</a>` : ''; };
 function popupHtml(m) {
-  return `<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
+  return `<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> ${calLink(m, '📆 Add to calendar')} <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
 }
 
 function render() {
@@ -251,7 +279,7 @@ function render() {
     el.innerHTML = `<h3>${m.name}</h3>
       <div class="meta">📅 ${whenText(m)}<br>🕒 ${m.time}<br>📍 ${placeLink(m)}</div>
       <span class="tag ${/^free/i.test(m.cost) ? '' : 'paid'}">${m.cost}</span>
-      <div><a href="${m.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Official page →</a></div>`;
+      <div><a href="${m.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Official page →</a> &nbsp;·&nbsp; ${calLink(m, '📆 Add to Google Calendar')}</div>`;
     el.onclick = () => { map.setView([m.lat, m.lng], 13); marker.openPopup(); };
     marker.on('popupopen', () => {
       document.querySelectorAll('.item.active').forEach(x => x.classList.remove('active'));
@@ -311,8 +339,8 @@ const $ = id => document.getElementById(id);
 function updateFormType() {
   const err = $('mType').value === 'error';
   $('mHint').textContent = err ? 'Tell me what is wrong and I will fix it.' : 'Send me a link and I will add it to the map.';
-  $('mLinkLabel').textContent = err ? 'Link showing the right information (optional)' : 'Link to the market (required)';
-  $('mDetailsLabel').textContent = err ? 'What is the error? (required)' : 'Anything else I should know? (optional)';
+  $('mLinkLabel').textContent = err ? 'Link showing the right information' : 'Link to the market *';
+  $('mDetailsLabel').textContent = err ? 'What is the error? *' : 'Anything else I should know?';
 }
 function openForm(type, name) {
   $('mType').value = type || 'missing'; $('mName').value = name || '';
