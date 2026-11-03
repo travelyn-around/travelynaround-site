@@ -88,11 +88,11 @@
 </header>
 
 <div class="bar">
-  <input id="q" class="search" type="search" placeholder="🔍 Search">
   <span id="chips" style="display:contents"></span>
   <button class="chip" id="freeBtn">Free only</button>
   <button class="chip add" id="addBtn">➕ Missing a market?</button>
   <span class="count" id="count"></span>
+  <input id="q" class="search" type="search" placeholder="🔍 Search">
 </div>
 
 <main>
@@ -320,6 +320,11 @@ function buildButtons() {
       if (days.length > 1 && days.every(d => [0, 5, 6].includes(d.getDay())))
         days.forEach(d => { if (!single.has(iso(d))) { out.push(dayBtn(d)); single.add(iso(d)); } });
     }
+  }
+  // from Nov 15 on, one combined button instead of the weekly and weekend-day buttons
+  if (today <= new Date(2026, 10, 15)) {
+    const early = out.filter(r => r.from < '2026-11-15');
+    out.length = 0; out.push(...early, { label:'Nov 15–30', from:'2026-11-15', to:'2026-11-30' });
   }
   out.push({ label:'December', from:'2026-12-01', to:'2026-12-31' });
   return out;
