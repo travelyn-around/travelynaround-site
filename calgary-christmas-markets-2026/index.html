@@ -41,13 +41,11 @@
   .cal-nav:disabled { opacity:.35; cursor:default; }
   .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; }
   .cal-dow { font-size:.72rem; color:var(--muted); }
-  .cal-day { border:0; background:none; border-radius:8px; padding:7px 0; font-size:.9rem; color:#b5b5b5; cursor:default; }
-  .cal-day.has { background:var(--green); color:#fff; font-weight:600; cursor:pointer; }
-  .cal-day.has:hover { filter:brightness(1.15); }
-  .cal-day.today { outline:2px solid var(--red); outline-offset:-2px; }
-  .cal-day.sel { box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--green); }
-  .cal-month { margin-top:10px; width:100%; border:1px solid var(--green); color:var(--green); background:#fff; border-radius:999px; padding:7px; font-weight:600; cursor:pointer; }
-  .cal-month:hover { background:#eef7f1; }
+  .cal-day { border:1px solid transparent; background:none; border-radius:8px; padding:7px 0; font-size:.9rem; color:#b5b5b5; cursor:default; transition: border-color .15s ease, box-shadow .15s ease, color .15s ease; }
+  .cal-day.has { color:var(--red); font-weight:700; cursor:pointer; }
+  .cal-day.has:hover, .cal-day.sel, .cal-title:hover, .cal-title.sel { border-color:var(--green); color:var(--green); background:#fff; box-shadow:0 0 0 2px var(--green), 0 0 10px 2px rgba(31,107,69,.35); }
+  .cal-title { border:1px solid transparent; background:none; border-radius:8px; padding:4px 12px; font-size:1rem; font-weight:700; color:var(--red); cursor:pointer; transition: border-color .15s ease, box-shadow .15s ease, color .15s ease; }
+  .cal-hint { margin-top:8px; font-size:.75rem; color:var(--muted); text-align:center; }
   .count { margin-left:auto; font-size:.85rem; color:var(--muted); }
   main { display:grid; grid-template-columns: 380px 1fr; height: calc(100vh - 140px); }
   #list { background:rgba(255,255,255,.35); overflow-y:auto; padding:12px; border-right:1px solid var(--line); }
@@ -406,7 +404,6 @@ function buildButtons() {
   }
   // the mini calendar covers every other date
   out.push({ label:'📅 Calendar', from:'0000', to:'9999', cal:true });
-  out.push({ label:'December', from:'2026-12-01', to:'2026-12-31' });
   return out;
 }
 const chips = document.getElementById('chips');
@@ -422,15 +419,15 @@ function drawCal() {
   const [y, mo] = calMonths[calIdx].split('-').map(Number);
   const firstDow = new Date(y, mo - 1, 1).getDay(), nDays = new Date(y, mo, 0).getDate();
   const todayIso = iso(new Date());
-  let h = '<div class="cal-head"><button class="cal-nav" data-nav="-1"' + (calIdx === 0 ? ' disabled' : '') + '>‹</button><strong>' + MONTH_NAMES[mo - 1] + ' ' + y + '</strong><button class="cal-nav" data-nav="1"' + (calIdx === calMonths.length - 1 ? ' disabled' : '') + '>›</button></div><div class="cal-grid">';
+  let h = '<div class="cal-head"><button class="cal-nav" data-nav="-1"' + (calIdx === 0 ? ' disabled' : '') + '>‹</button><button class="cal-title' + (range.to === calMonths[calIdx] + '-31' ? ' sel' : '') + '" data-month="' + calMonths[calIdx] + '" title="Show all of ' + MONTH_NAMES[mo - 1] + '">' + MONTH_NAMES[mo - 1] + ' ' + y + '</button><button class="cal-nav" data-nav="1"' + (calIdx === calMonths.length - 1 ? ' disabled' : '') + '>›</button></div><div class="cal-grid">';
   h += DAY.map(d => '<span class="cal-dow">' + d[0] + '</span>').join('');
   for (let i = 0; i < firstDow; i++) h += '<span></span>';
   for (let d = 1; d <= nDays; d++) {
     const ds = y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0');
     const has = marketDays.has(ds) && ds >= todayIso;
-    h += '<button class="cal-day' + (has ? ' has' : '') + (ds === todayIso ? ' today' : '') + (range.from === ds && range.to === ds ? ' sel' : '') + '"' + (has ? ' data-day="' + ds + '"' : '') + '>' + d + '</button>';
+    h += '<button class="cal-day' + (has ? ' has' : '') + (range.from === ds && range.to === ds ? ' sel' : '') + '"' + (has ? ' data-day="' + ds + '"' : '') + '>' + d + '</button>';
   }
-  h += '</div><button class="cal-month" data-month="' + calMonths[calIdx] + '">Show all of ' + MONTH_NAMES[mo - 1] + '</button>';
+  h += '</div><div class="cal-hint">Tap the month name to see the whole month</div>';
   calPanel.innerHTML = h;
 }
 function resetCal() { calPanel.classList.remove('open'); if (calChip) calChip.textContent = '📅 Calendar'; }
