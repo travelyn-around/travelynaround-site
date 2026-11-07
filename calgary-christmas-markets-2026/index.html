@@ -33,12 +33,21 @@
   .bar { display:flex; flex-wrap:wrap; gap:8px; padding:10px 16px; background:#fff; border-bottom:1px solid var(--line); align-items:center; }
   .chip { border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 14px; font-size:.9rem; cursor:pointer; }
   .chip.on { background:var(--green); color:#fff; border-color:var(--green); }
-  .subbar { display:none; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 16px; background:#fff; border-bottom:1px solid var(--line); }
-  .subbar.show { display:flex; }
-  .subbar .lbl { font-size:.8rem; color:var(--muted); margin-right:2px; }
-  .subchip { border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 10px; font-size:.82rem; cursor:pointer; }
-  .subchip.on { background:var(--green); color:#fff; border-color:var(--green); }
-  @media (min-width: 761px) { body.hasSub main { height: calc(100vh - 190px); } }
+  .bar { position:relative; }
+  .cal { display:none; position:absolute; top:100%; left:16px; z-index:2000; width:min(300px, calc(100vw - 32px)); background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.18); padding:12px; }
+  .cal.open { display:block; }
+  .cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .cal-nav { border:1px solid var(--line); background:#fff; border-radius:8px; width:32px; height:32px; font-size:1.1rem; cursor:pointer; }
+  .cal-nav:disabled { opacity:.35; cursor:default; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; }
+  .cal-dow { font-size:.72rem; color:var(--muted); }
+  .cal-day { border:0; background:none; border-radius:8px; padding:7px 0; font-size:.9rem; color:#b5b5b5; cursor:default; }
+  .cal-day.has { background:var(--green); color:#fff; font-weight:600; cursor:pointer; }
+  .cal-day.has:hover { filter:brightness(1.15); }
+  .cal-day.today { outline:2px solid var(--red); outline-offset:-2px; }
+  .cal-day.sel { box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--green); }
+  .cal-month { margin-top:10px; width:100%; border:1px solid var(--green); color:var(--green); background:#fff; border-radius:999px; padding:7px; font-weight:600; cursor:pointer; }
+  .cal-month:hover { background:#eef7f1; }
   .count { margin-left:auto; font-size:.85rem; color:var(--muted); }
   main { display:grid; grid-template-columns: 380px 1fr; height: calc(100vh - 140px); }
   #list { background:rgba(255,255,255,.35); overflow-y:auto; padding:12px; border-right:1px solid var(--line); }
@@ -116,7 +125,6 @@
   <span class="count" id="count"></span>
   <input id="q" class="search" type="search" placeholder="🔍 Search">
 </div>
-<div class="subbar" id="subbar"></div>
 
 <main>
   <div id="list"></div>
@@ -389,57 +397,79 @@ function buildButtons() {
     const single = new Set();
     // each day of this week, plus the Sunday that ends the weekend
     for (let d = new Date(cur); d <= addDays(weekEnd, 1) && d <= novEnd; d = addDays(d, 1)) { out.push(dayBtn(d)); single.add(iso(d)); }
-    for (let st = addDays(weekEnd, 1); st <= novEnd; st = addDays(st, 7)) {
-      let en = addDays(st, 6); if (en > novEnd) en = novEnd;
-      // week of Nov 9-14: one button per day that has a market, no weekly range button
-      if (iso(st) === '2026-11-08') {
-        for (let d = addDays(st, 1); d <= en; d = addDays(d, 1))
-          if (hasMarket(iso(d)) && !single.has(iso(d))) { out.push(dayBtn(d)); single.add(iso(d)); }
-        continue;
-      }
-      out.push({ label: MON[st.getMonth()] + ' ' + st.getDate() + '–' + en.getDate(), from: iso(st), to: iso(en) });
-      // a week whose markets only fall on Fri, Sat and Sun also gets a button for each of those days
-      const days = [];
-      for (let d = new Date(st); d <= en; d = addDays(d, 1)) if (hasMarket(iso(d))) days.push(d);
-      if (days.length > 1 && days.every(d => [0, 5, 6].includes(d.getDay())))
-        days.forEach(d => { if (!single.has(iso(d))) { out.push(dayBtn(d)); single.add(iso(d)); } });
+    // week of Nov 9-14: one button per day that has a market, no empty days
+    const st = addDays(weekEnd, 1);
+    if (iso(st) === '2026-11-08') {
+      for (let d = addDays(st, 1); d <= addDays(st, 6); d = addDays(d, 1))
+        if (hasMarket(iso(d)) && !single.has(iso(d))) { out.push(dayBtn(d)); single.add(iso(d)); }
     }
   }
-  // from Nov 15 on, one combined button instead of the weekly and weekend-day buttons
-  if (today <= new Date(2026, 10, 15)) {
-    const early = out.filter(r => r.from < '2026-11-15');
-    out.length = 0; out.push(...early, { label:'Nov 15–30', from:'2026-11-15', to:'2026-11-30' });
-  }
+  // the mini calendar covers every other date
+  out.push({ label:'📅 Calendar', from:'0000', to:'9999', cal:true });
   out.push({ label:'December', from:'2026-12-01', to:'2026-12-31' });
   return out;
 }
 const chips = document.getElementById('chips');
-// second row of day buttons: appears under a button that covers several days (Nov 15–30, December, a week)
-const subbar = document.getElementById('subbar');
-function showSub(r) {
-  subbar.innerHTML = '';
-  const multi = r.from !== r.to && r.from !== '0000';
-  document.body.classList.toggle('hasSub', multi);
-  subbar.classList.toggle('show', multi);
-  if (!multi) return;
-  const lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = 'Pick a day:'; subbar.appendChild(lbl);
-  const add = (label, rg, on) => {
-    const c = document.createElement('button');
-    c.className = 'subchip' + (on ? ' on' : ''); c.textContent = label;
-    c.onclick = () => { subbar.querySelectorAll('.subchip').forEach(x => x.classList.remove('on')); c.classList.add('on'); range = rg; render(); };
-    subbar.appendChild(c);
-  };
-  add('All dates', r, true);
-  [...new Set(MARKETS.flatMap(m => m.dates))].filter(d => d >= r.from && d <= r.to).sort().forEach(d => {
-    const dt = new Date(d + 'T12:00'), n = MARKETS.filter(m => m.dates.includes(d)).length;
-    add(DAY[dt.getDay()] + ' ' + MON[dt.getMonth()] + ' ' + dt.getDate() + ' (' + n + ')', { from:d, to:d }, false);
-  });
+// ----- mini calendar: days with markets are green and clickable -----
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const marketDays = new Set(MARKETS.flatMap(m => m.dates));
+const calMonths = [...new Set([...marketDays].map(d => d.slice(0, 7)))].sort();
+const calPanel = document.createElement('div');
+calPanel.className = 'cal';
+document.querySelector('.bar').appendChild(calPanel);
+let calIdx = 0, calChip = null;
+function drawCal() {
+  const [y, mo] = calMonths[calIdx].split('-').map(Number);
+  const firstDow = new Date(y, mo - 1, 1).getDay(), nDays = new Date(y, mo, 0).getDate();
+  const todayIso = iso(new Date());
+  let h = '<div class="cal-head"><button class="cal-nav" data-nav="-1"' + (calIdx === 0 ? ' disabled' : '') + '>‹</button><strong>' + MONTH_NAMES[mo - 1] + ' ' + y + '</strong><button class="cal-nav" data-nav="1"' + (calIdx === calMonths.length - 1 ? ' disabled' : '') + '>›</button></div><div class="cal-grid">';
+  h += DAY.map(d => '<span class="cal-dow">' + d[0] + '</span>').join('');
+  for (let i = 0; i < firstDow; i++) h += '<span></span>';
+  for (let d = 1; d <= nDays; d++) {
+    const ds = y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const has = marketDays.has(ds) && ds >= todayIso;
+    h += '<button class="cal-day' + (has ? ' has' : '') + (ds === todayIso ? ' today' : '') + (range.from === ds && range.to === ds ? ' sel' : '') + '"' + (has ? ' data-day="' + ds + '"' : '') + '>' + d + '</button>';
+  }
+  h += '</div><button class="cal-month" data-month="' + calMonths[calIdx] + '">Show all of ' + MONTH_NAMES[mo - 1] + '</button>';
+  calPanel.innerHTML = h;
 }
+function resetCal() { calPanel.classList.remove('open'); if (calChip) calChip.textContent = '📅 Calendar'; }
+function toggleCal() {
+  if (calPanel.classList.contains('open')) { calPanel.classList.remove('open'); return; }
+  const cur = (range.from !== '0000' ? range.from : iso(new Date())).slice(0, 7);
+  calIdx = Math.max(0, calMonths.indexOf(cur));
+  drawCal(); calPanel.classList.add('open');
+}
+calPanel.addEventListener('click', e => {
+  e.stopPropagation();
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.nav) { calIdx += Number(t.dataset.nav); drawCal(); return; }
+  let label;
+  if (t.dataset.day) {
+    range = { from: t.dataset.day, to: t.dataset.day };
+    const dt = new Date(t.dataset.day + 'T12:00');
+    label = DAY[dt.getDay()] + ' ' + MON[dt.getMonth()] + ' ' + dt.getDate();
+  } else if (t.dataset.month) {
+    const first = t.dataset.month + '-01', t0 = iso(new Date());
+    range = { from: first > t0 ? first : t0, to: t.dataset.month + '-31' };
+    label = MONTH_NAMES[Number(t.dataset.month.slice(5)) - 1];
+  } else return;
+  chips.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+  calChip.classList.add('on'); calChip.textContent = '📅 ' + label;
+  calPanel.classList.remove('open'); render();
+});
+document.addEventListener('click', () => calPanel.classList.remove('open'));
+
 buildButtons().filter((r, i) => i === 0 || MARKETS.some(m => m.dates.some(x => x >= r.from && x <= r.to))).forEach((r, i) => {
   const b = document.createElement('button');
   b.className = 'chip' + (i === 0 ? ' on' : '');
   b.textContent = r.label;
-  b.onclick = () => { chips.querySelectorAll('.chip').forEach(x => x.classList.remove('on')); b.classList.add('on'); range = r; showSub(r); render(); };
+  if (r.cal) {
+    calChip = b;
+    b.onclick = e => { e.stopPropagation(); toggleCal(); };
+  } else {
+    b.onclick = () => { chips.querySelectorAll('.chip').forEach(x => x.classList.remove('on')); b.classList.add('on'); range = r; resetCal(); render(); };
+  }
   chips.appendChild(b);
 });
 document.getElementById('freeBtn').onclick = e => { freeOnly = !freeOnly; e.target.classList.toggle('on', freeOnly); render(); };
