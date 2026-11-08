@@ -1,79 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="robots" content="noindex">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Travelyn Around | Wandering around the earth</title>
-<meta name="description" content="Maps and photo albums from wandering around the earth.">
+<meta name="robots" content="noindex">
+<title>Travelyn Around</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&display=swap" rel="stylesheet">
 <style>
-  :root { --sky:#cdeeea; --sun:#fff3cf; --ink:#12343b; --deep:#0c4a56; --coral:#ee5a3c; --gold:#f2b632; --muted:#47666c; }
+  :root { --lagoon:#0e7490; --deep:#0b3b4a; --mist:#e6f4f7; --green:#1f6b45; --red:#b3262d; --muted:#5b6b73; --line:#cfe3e8; }
   * { box-sizing:border-box; }
-  body { margin:0; color:var(--ink); font:1.05rem/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; background:linear-gradient(180deg,var(--sky) 0%,#eaf7f2 45%,var(--sun) 100%) fixed; }
-  h1, h2 { font-family:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif; line-height:1.05; margin:0; }
-  main { max-width:760px; margin:0 auto; padding:56px 20px 40px; }
-  .hero h1 { font-size:clamp(2.8rem, 11vw, 5.2rem); font-weight:800; letter-spacing:-.02em; color:var(--deep); }
-  .hero p { max-width:30em; margin:16px 0 0; font-size:1.2rem; color:var(--muted); }
-
-  /* the route: a dashed line that draws itself once when the page loads */
-  .trail { position:relative; margin-top:56px; padding-left:64px; }
-  .trail::before { content:""; position:absolute; left:19px; top:14px; bottom:30px; width:4px;
-    background:repeating-linear-gradient(to bottom, var(--coral) 0 10px, transparent 10px 20px); border-radius:2px;
-    animation:draw 1.8s ease-out both; }
-  @keyframes draw { from { clip-path:inset(0 0 100% 0); } to { clip-path:inset(0); } }
-  @media (prefers-reduced-motion: reduce) { .trail::before { animation:none; } }
-
-  .stop { position:relative; margin-bottom:52px; }
-  .stop::before { content:attr(data-icon); position:absolute; left:-64px; top:-4px; width:42px; height:42px; border-radius:50%;
-    background:#fff; border:3px solid var(--coral); display:grid; place-items:center; font-size:1.25rem; }
-  .stop h2 { font-size:clamp(1.6rem, 5vw, 2.2rem); font-weight:800; color:var(--deep); }
-  .stop p { margin:8px 0 0; max-width:34em; }
-  .go { display:inline-block; margin-top:14px; padding:10px 20px; border-radius:999px; background:var(--deep); color:#fff; text-decoration:none; font-weight:700; }
-  .go:hover { background:var(--coral); }
-  a:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
-
-  footer { max-width:760px; margin:0 auto; padding:0 20px 40px; color:var(--muted); font-size:.9rem; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--deep); background:linear-gradient(180deg,var(--mist) 0%,#fff 60%); min-height:100vh; }
+  .wrap { max-width:760px; margin:0 auto; padding:48px 20px 40px; }
+  header { text-align:center; margin-bottom:34px; }
+  .logo { font-size:2.2rem; font-weight:800; letter-spacing:-.5px; color:var(--lagoon); margin:0; }
+  .tag { margin:6px 0 0; color:var(--muted); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px; margin-bottom:18px; box-shadow:0 6px 18px rgba(11,59,74,.07); }
+  .card h2 { margin:0 0 8px; font-size:1.4rem; }
+  .card p { margin:0 0 16px; line-height:1.55; color:var(--muted); }
+  .xmas { border-color:var(--green); box-shadow:0 0 0 2px var(--green), 0 10px 26px rgba(31,107,69,.18); }
+  .xmas h2 { color:var(--red); }
+  .btn { display:inline-block; background:var(--green); color:#fff; text-decoration:none; font-weight:700; padding:11px 22px; border-radius:999px; transition:transform .15s ease, box-shadow .15s ease; }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(31,107,69,.35); }
+  .soon { opacity:.8; background:repeating-linear-gradient(135deg,#fff,#fff 12px,#f5fafb 12px,#f5fafb 24px); }
+  .badge { display:inline-block; background:var(--mist); color:var(--lagoon); font-weight:700; font-size:.8rem; padding:5px 12px; border-radius:999px; }
+  footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:26px; }
+  footer a { color:var(--red); }
 </style>
-  <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
-<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<main>
-  <section class="hero">
-    <h1>Travelyn Around</h1>
-    <p>Wandering around the earth and collecting the neat things found along the way.</p>
+<div class="wrap">
+  <header>
+    <h1 class="logo">🧭 Travelyn Around</h1>
+    <p class="tag">Maps, markets and travel stories</p>
+  </header>
+
+  <section class="card xmas">
+    <h2>🎄 Calgary Christmas Markets 2026</h2>
+    <p>One map of Christmas markets and holiday craft fairs in Calgary and nearby towns, with dates, hours, prices and addresses. Pick a day on the calendar to see what is on.</p>
+    <a class="btn" href="/calgary-christmas-markets-2026">Open the map →</a>
   </section>
 
-  <!--
-    HOW TO EDIT: each place on the route is one <section class="stop"> block below.
-    To add one, copy a whole block, paste it where you want it, and change the icon, heading, text and link.
-  -->
-  <div class="trail">
+  <section class="card soon">
+    <h2>📸 Travel album</h2>
+    <p>My trips, pin by pin, with photos from each place. Still being put together.</p>
+    <span class="badge">Coming soon</span>
+  </section>
 
-    <section class="stop" data-icon="🎄">
-      <h2>Now open: Calgary Christmas markets 2026</h2>
-      <p>A map of Christmas markets in Calgary and the towns around it, with dates, prices and directions.</p>
-      <a class="go" href="/calgary-christmas-markets-2026/">See the map</a>
-    </section>
-
-    <section class="stop" data-icon="📍">
-      <h2>The travel album</h2>
-      <p>Photo albums from trips, pinned to a map of the world.</p>
-      <a class="go" href="https://personal-travel-map-phi.vercel.app/travelynaround">Open the album</a>
-    </section>
-
-    <section class="stop" data-icon="✈️">
-      <h2>Next stop</h2>
-      <p>More maps, albums and finds are on the way.</p>
-    </section>
-
-  </div>
-</main>
-<footer>© <span id="yr"></span> Travelyn Around</footer>
-<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+  <footer>Was this helpful? <a href="https://ko-fi.com/koffev" target="_blank" rel="noopener">Help fuel ☕</a></footer>
+</div>
 </body>
 </html>
