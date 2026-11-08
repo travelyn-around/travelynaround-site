@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://travelynaround.com/sitemap.xml
+Sitemap: https://www.travelynaround.com/sitemap.xml
