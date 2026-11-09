@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    { "source": "/calgary-christmas-markets-2026", "destination": "/calgary-christmas-markets", "permanent": true },
+    { "source": "/calgary-christmas-markets-2026/", "destination": "/calgary-christmas-markets", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/calgary-christmas-markets", "destination": "/calgary-christmas-markets-2026/index.html" },
+    { "source": "/calgary-christmas-markets/", "destination": "/calgary-christmas-markets-2026/index.html" }
+  ]
+}
