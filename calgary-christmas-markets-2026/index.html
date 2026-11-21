@@ -82,6 +82,10 @@
   .box textarea, .box select { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:.95rem; font-family:inherit; }
   .item.active { border-color:var(--green); background:#fff; transform:translateY(-2px); box-shadow:0 0 0 2px var(--green), 0 0 18px 4px rgba(31,107,69,.45); }
   .item { display:flow-root; }
+  .past { margin-top:14px; }
+  .past summary { cursor:pointer; font-weight:700; color:var(--green); padding:10px 4px; }
+  .item.past-item { opacity:.6; cursor:default; }
+  .item.past-item:hover { transform:none; box-shadow:none; }
   .item .thumb { float:right; width:72px; height:72px; object-fit:cover; border-radius:8px; margin:0 0 6px 10px; }
   .leaflet-popup-content img.thumb { display:block; width:100%; height:auto; max-height:200px; object-fit:contain; background:#f6f1e7; border-radius:8px; margin-bottom:8px; }
   .recentre-btn { background:#fff; border:0; padding:6px 10px; font-size:.85rem; font-weight:600; color:var(--green); cursor:pointer; border-radius:4px; }
@@ -313,12 +317,17 @@ const MARKETS = [
     place:"Heritage Park Historical Village, 1900 Heritage Dr SW", lat:50.9824547, lng:-114.1009544, url:"https://heritagepark.ca", img:"/calgary-christmas-markets-2026/images/heritage.png" },
   { name:"Cornerstone Music Cafe Annual Christmas Market", time:"10 AM - 4 PM", start:"10:00", end:"16:00", dates:['2026-12-05'], cost:"Free",
     place:"Cornerstone Music Cafe, 14919 Deer Ridge Dr SE #139 and Deer Run Community Association", lat:50.9303013, lng:-114.0249934, url:"https://www.instagram.com/p/DfkSRaDCDkc/", img:"/calgary-christmas-markets-2026/images/cornerstone.png" },
-  { name:"Wint-Her Market", time:"3:30 PM - 7:30 PM", start:"15:30", end:"19:30", dates:['2026-11-23'], cost:"Free",
-    place:"YWCA Community Hub, 1715 17 Avenue SE", lat:51.0373143, lng:-114.0259356, url:"https://www.eventbrite.ca/e/wint-her-market-in-inglewood-tickets-2003933863129", img:"/calgary-christmas-markets-2026/images/ywca.jpg" },
-  { name:"Balzac Christmas Market", time:"Fri 4 – 8 PM, Sat 10 AM – 4 PM", dates:R('2026-11-20','2026-11-21'), cost:"Free",
-    place:"GYM 4031, 292120 Wagon Wheel Blvd, Rocky View County", lat:51.211399, lng:-113.967967, url:"https://airdrie.gwevents.ca/events/239914", img:"/calgary-christmas-markets-2026/images/balzac.jpg" },
-  { name:"Alpine Park Christmas Market", time:"5 PM - 8 PM", start:"17:00", end:"20:00", dates:['2026-11-26'], cost:"Not listed",
-    place:"83 Alpine Green SW", lat:50.9184107, lng:-114.1505639, url:"https://alpinepark.ca/stories-and-events/christmas-market/", img:"/calgary-christmas-markets-2026/images/alpine.jpg" },
+  { name:"Ogres Den Artisans Market", time:"From 10 AM (end time not listed)", dates:['2026-11-20'], cost:"Not listed",
+    place:"Ogre's Den Gaming Club, 3220 5 Ave NE", lat:51.0575952, lng:-113.9868376, url:"https://allevents.in/calgary/ogres-den-artisans-market/200030876234756" },
+  { name:"The Marketplace of Makers (Didsbury)", time:"From 10 AM (end time not listed)", dates:['2026-11-20'], cost:"Free",
+    place:"Didsbury Memorial Complex, 1702 21 Ave, Didsbury", lat:51.6619494, lng:-114.1340034, url:"https://allevents.in/didsbury/the-marketplace-of-makers/100001992948961994" },
+  { name:"Luxstone Holiday Market", time:"From 10 AM (end time not listed)", dates:['2026-11-21'], cost:"Not listed",
+    note:"live music",
+    place:"2014 Luxstone Blvd SW, Airdrie", lat:51.2717476, lng:-114.0201381, url:"https://allevents.in/airdrie/luxstone-holiday-market/200030982866740" },
+  { name:"Prince of Peace Christmas Market", time:"From 9 AM (end time not listed)", dates:['2026-11-21'], cost:"Free",
+    place:"300 Prince of Peace Way, Chestermere", lat:51.0620735, lng:-113.892222, url:"https://allevents.in/chestermere/prince-of-peace-christmas-market/200031004277115" },
+  { name:"Calgary German Canadian Club Christmas Craft Fair", time:"From 10 AM (end time not listed)", dates:['2026-11-22'], cost:"Free",
+    place:"German Canadian Club of Calgary, 218 37 Ave NE", lat:51.0860401, lng:-114.0590257, url:"https://allevents.in/calgary/calgary-german-canadian-club-christmas-craft-fair-2026/100002003977882793" },
 ];
 // ====== end of list ======
 
@@ -402,11 +411,16 @@ function popupHtml(m) {
 function render() {
   const shown = MARKETS.filter(m => m.dates.some(x => x >= range.from && x <= range.to) && (!freeOnly || isFree(m)) && matchesQuery(m));
   shown.sort((a, b) => nextDate(a).localeCompare(nextDate(b)) || a.name.localeCompare(b.name));
-  shownNow = shown;
+  // markets whose dates have all passed go into a collapsed "Past markets" section at the bottom
+  const todayStr = iso(new Date());
+  const lastDate = m => [...m.dates].sort().pop();
+  const upcoming = shown.filter(m => lastDate(m) >= todayStr);
+  const past = shown.filter(m => lastDate(m) < todayStr).sort((a, b) => lastDate(b).localeCompare(lastDate(a)));
+  shownNow = upcoming;
   layer.clearLayers();
   const list = document.getElementById('list');
   list.innerHTML = '';
-  shown.forEach(m => {
+  upcoming.forEach(m => {
     const marker = L.marker([m.lat, m.lng], { icon }).bindPopup(popupHtml(m)).addTo(layer);
     const el = document.createElement('div');
     el.className = 'item';
@@ -426,9 +440,21 @@ function render() {
     marker.on('popupclose', () => el.classList.remove('active'));
     list.appendChild(el);
   });
-  if (shown.length) map.fitBounds(shown.map(m => [m.lat, m.lng]), { padding:[40,40], maxZoom:12 });
-  document.getElementById('count').textContent = shown.length + ' market' + (shown.length === 1 ? '' : 's');
-  if (!shown.length) list.innerHTML = '<p>No markets match. Try another date button or a different search.</p>';
+  if (upcoming.length) map.fitBounds(upcoming.map(m => [m.lat, m.lng]), { padding:[40,40], maxZoom:12 });
+  document.getElementById('count').textContent = upcoming.length + ' market' + (upcoming.length === 1 ? '' : 's');
+  if (!upcoming.length) list.insertAdjacentHTML('afterbegin', '<p>' + (past.length ? 'No upcoming markets match.' : 'No markets match. Try another date button or a different search.') + '</p>');
+  if (past.length) {
+    const box = document.createElement('details');
+    box.className = 'past';
+    box.innerHTML = '<summary>Past markets (' + past.length + ')</summary>';
+    past.forEach(m => {
+      const el = document.createElement('div');
+      el.className = 'item past-item';
+      el.innerHTML = `<h3>${m.name}</h3><div class="meta">📅 ${whenText(m)}<br>📍 ${placeLink(m)}</div><div><a href="${m.url}" target="_blank" rel="noopener">Official page →</a></div>`;
+      box.appendChild(el);
+    });
+    list.appendChild(box);
+  }
   list.scrollTop = 0;
 }
 
