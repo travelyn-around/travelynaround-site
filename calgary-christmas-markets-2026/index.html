@@ -460,11 +460,22 @@ async function shareMarket(id, ev) {
   try { await navigator.clipboard.writeText(url); showToast('Link copied!'); }
   catch (err) { prompt('Copy this link:', url); }
 }
+// Zoom to a market, open its popup, and re-fit the popup once its picture has loaded (the picture changes the popup's height)
+function focusMarket(m, marker) {
+  map.setView([m.lat, m.lng], 13);
+  marker.openPopup();
+  const popup = marker.getPopup();
+  const refit = () => { if (popup.isOpen()) popup._adjustPan(); };
+  const el = popup.getElement();
+  if (el) el.querySelectorAll('img').forEach(img => { if (!img.complete) img.addEventListener('load', refit); });
+  setTimeout(refit, 150);
+  setTimeout(refit, 600);
+}
 function openFromHash() {
   const hit = markerById[decodeURIComponent(location.hash.slice(1))];
   if (!hit) return;
-  map.setView([hit.m.lat, hit.m.lng], 13);
-  hit.marker.openPopup();
+  if (window.innerWidth <= 760) document.getElementById('map').scrollIntoView({ block:'start' });
+  focusMarket(hit.m, hit.marker);
 }
 function popupHtml(m) {
   return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> ${calLink(m, '📆 Add to calendar')} ${shareBtn(m)} <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
@@ -484,7 +495,7 @@ function render() {
   const list = document.getElementById('list');
   list.innerHTML = '';
   upcoming.forEach(m => {
-    const marker = L.marker([m.lat, m.lng], { icon }).bindPopup(popupHtml(m)).addTo(layer);
+    const marker = L.marker([m.lat, m.lng], { icon }).bindPopup(popupHtml(m), { autoPanPadding:[30,30] }).addTo(layer);
     markerById[slug(m)] = { marker, m };
     const el = document.createElement('div');
     el.className = 'item';
@@ -493,7 +504,7 @@ function render() {
       <span class="tag ${/^free/i.test(m.cost) ? '' : 'paid'}">${m.cost}</span>
       <div><a href="${m.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Official page →</a> &nbsp;·&nbsp; ${calLink(m, '📆 Add to Calendar')} &nbsp;·&nbsp; ${shareBtn(m)}</div>`;
     el.onclick = () => {
-      map.setView([m.lat, m.lng], 13); marker.openPopup();
+      focusMarket(m, marker);
       if (window.innerWidth <= 760) document.getElementById('map').scrollIntoView({ behavior:'smooth', block:'start' });
     };
     marker.on('popupopen', () => {
