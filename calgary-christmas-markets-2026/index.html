@@ -78,9 +78,6 @@
   .coffee a { display:inline-block; margin-left:6px; background:var(--green); color:#fff; text-decoration:none; padding:8px 16px; border-radius:999px; font-weight:600; }
   .search { flex:0 1 130px; width:130px; min-width:0; padding:6px 12px; border:1px solid var(--line); border-radius:999px; font-size:.9rem; }
   .search:focus { outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(31,107,69,.25); }
-  .share-btn { border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; padding:3px 11px; font-size:.85rem; font-family:inherit; cursor:pointer; }
-  .share-btn:hover { border-color:var(--green); color:var(--green); }
-  .leaflet-popup-content .share-btn { margin-top:6px; }
   .share-toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:var(--green); color:#fff; padding:10px 18px; border-radius:999px; font-size:.95rem; font-weight:600; z-index:5000; box-shadow:0 6px 18px rgba(0,0,0,.3); }
   .leaflet-popup-content a.rep { background:none; color:var(--muted); padding:0; margin-left:8px; font-weight:400; text-decoration:underline; }
   .box textarea, .box select { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:.95rem; font-family:inherit; }
@@ -444,7 +441,7 @@ function calendarLink(m) {
 }
 const calLink = (m, label) => { const u = calendarLink(m); return u ? `<a href="${u}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${label}</a>` : ''; };
 const slug = m => m.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const shareBtn = m => `<button type="button" class="share-btn" title="Share this market" onclick="shareMarket('${slug(m)}', event)">🔗 Share</button>`;
+const shareBtn = m => `<a href="#" onclick="shareMarket('${slug(m)}', event)">↗ Share</a>`;
 function showToast(text) {
   const t = document.createElement('div');
   t.className = 'share-toast'; t.textContent = text;
@@ -452,7 +449,7 @@ function showToast(text) {
   setTimeout(() => t.remove(), 2200);
 }
 async function shareMarket(id, ev) {
-  ev.stopPropagation();
+  ev.preventDefault(); ev.stopPropagation();
   const m = MARKETS.find(x => slug(x) === id);
   if (!m) return;
   const url = location.origin + location.pathname + '#' + id;
@@ -470,7 +467,7 @@ function openFromHash() {
   hit.marker.openPopup();
 }
 function popupHtml(m) {
-  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> ${calLink(m, '📆 Add to calendar')} <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a><br>${shareBtn(m)}`;
+  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> ${calLink(m, '📆 Add to calendar')} ${shareBtn(m)} <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
 }
 
 function render() {
@@ -494,7 +491,7 @@ function render() {
     el.innerHTML = `${thumb(m)}<h3>${m.name}</h3>
       <div class="meta">📅 ${whenText(m)}<br>🕒 ${m.time}<br>📍 ${placeLink(m)}</div>
       <span class="tag ${/^free/i.test(m.cost) ? '' : 'paid'}">${m.cost}</span>
-      <div><a href="${m.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Official page →</a> &nbsp;·&nbsp; ${calLink(m, '📆 Add to Google Calendar')} &nbsp;·&nbsp; ${shareBtn(m)}</div>`;
+      <div><a href="${m.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Official page →</a> &nbsp;·&nbsp; ${calLink(m, '📆 Add to Calendar')} &nbsp;·&nbsp; ${shareBtn(m)}</div>`;
     el.onclick = () => {
       map.setView([m.lat, m.lng], 13); marker.openPopup();
       if (window.innerWidth <= 760) document.getElementById('map').scrollIntoView({ behavior:'smooth', block:'start' });
