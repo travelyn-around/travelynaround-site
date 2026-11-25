@@ -78,6 +78,10 @@
   .coffee a { display:inline-block; margin-left:6px; background:var(--green); color:#fff; text-decoration:none; padding:8px 16px; border-radius:999px; font-weight:600; }
   .search { flex:0 1 130px; width:130px; min-width:0; padding:6px 12px; border:1px solid var(--line); border-radius:999px; font-size:.9rem; }
   .search:focus { outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(31,107,69,.25); }
+  .share-btn { border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; padding:3px 11px; font-size:.85rem; font-family:inherit; cursor:pointer; }
+  .share-btn:hover { border-color:var(--green); color:var(--green); }
+  .leaflet-popup-content .share-btn { margin-top:6px; }
+  .share-toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:var(--green); color:#fff; padding:10px 18px; border-radius:999px; font-size:.95rem; font-weight:600; z-index:5000; box-shadow:0 6px 18px rgba(0,0,0,.3); }
   .leaflet-popup-content a.rep { background:none; color:var(--muted); padding:0; margin-left:8px; font-weight:400; text-decoration:underline; }
   .box textarea, .box select { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:.95rem; font-family:inherit; }
   .item.active { border-color:var(--green); background:#fff; transform:translateY(-2px); box-shadow:0 0 0 2px var(--green), 0 0 18px 4px rgba(31,107,69,.45); }
@@ -374,6 +378,7 @@ const icon = L.divIcon({ html:'<div class="pin">🎄</div>', className:'', iconS
 let range = { from:'0000', to:'9999' }, freeOnly = false, layer = L.layerGroup().addTo(map);
 
 let query = '';
+let markerById = {};
 let shownNow = [];
 const Recentre = L.Control.extend({
   options: { position:'topleft' },
@@ -438,8 +443,34 @@ function calendarLink(m) {
     + '&location=' + encodeURIComponent(m.map || (m.place + ', Alberta'));
 }
 const calLink = (m, label) => { const u = calendarLink(m); return u ? `<a href="${u}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${label}</a>` : ''; };
+const slug = m => m.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const shareBtn = m => `<button type="button" class="share-btn" title="Share this market" onclick="shareMarket('${slug(m)}', event)">🔗 Share</button>`;
+function showToast(text) {
+  const t = document.createElement('div');
+  t.className = 'share-toast'; t.textContent = text;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+async function shareMarket(id, ev) {
+  ev.stopPropagation();
+  const m = MARKETS.find(x => slug(x) === id);
+  if (!m) return;
+  const url = location.origin + location.pathname + '#' + id;
+  if (navigator.share) {
+    try { await navigator.share({ title: m.name, text: m.name + ' – ' + whenText(m), url }); return; }
+    catch (err) { if (err.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(url); showToast('Link copied!'); }
+  catch (err) { prompt('Copy this link:', url); }
+}
+function openFromHash() {
+  const hit = markerById[decodeURIComponent(location.hash.slice(1))];
+  if (!hit) return;
+  map.setView([hit.m.lat, hit.m.lng], 13);
+  hit.marker.openPopup();
+}
 function popupHtml(m) {
-  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> ${calLink(m, '📆 Add to calendar')} <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
+  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> ${calLink(m, '📆 Add to calendar')} <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a><br>${shareBtn(m)}`;
 }
 
 function render() {
@@ -452,16 +483,18 @@ function render() {
   const past = shown.filter(m => lastDate(m) < todayStr).sort((a, b) => lastDate(b).localeCompare(lastDate(a)));
   shownNow = upcoming;
   layer.clearLayers();
+  markerById = {};
   const list = document.getElementById('list');
   list.innerHTML = '';
   upcoming.forEach(m => {
     const marker = L.marker([m.lat, m.lng], { icon }).bindPopup(popupHtml(m)).addTo(layer);
+    markerById[slug(m)] = { marker, m };
     const el = document.createElement('div');
     el.className = 'item';
     el.innerHTML = `${thumb(m)}<h3>${m.name}</h3>
       <div class="meta">📅 ${whenText(m)}<br>🕒 ${m.time}<br>📍 ${placeLink(m)}</div>
       <span class="tag ${/^free/i.test(m.cost) ? '' : 'paid'}">${m.cost}</span>
-      <div><a href="${m.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Official page →</a> &nbsp;·&nbsp; ${calLink(m, '📆 Add to Google Calendar')}</div>`;
+      <div><a href="${m.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Official page →</a> &nbsp;·&nbsp; ${calLink(m, '📆 Add to Google Calendar')} &nbsp;·&nbsp; ${shareBtn(m)}</div>`;
     el.onclick = () => {
       map.setView([m.lat, m.lng], 13); marker.openPopup();
       if (window.innerWidth <= 760) document.getElementById('map').scrollIntoView({ behavior:'smooth', block:'start' });
@@ -627,6 +660,8 @@ document.getElementById('q').addEventListener('input', e => { query = e.target.v
   for (let i = 0; i < 90; i++) { const b = document.createElement('i'); b.style.background = cols[i % 4]; b.style.color = cols[i % 4]; b.style.animationDelay = ((i % 5) * 0.3) + 's'; wrap.appendChild(b); }
 })();
 render();
+openFromHash();
+window.addEventListener('hashchange', openFromHash);
 
 // ---- Event data for search engines (lets Google show dates and details in results) ----
 (function () {
