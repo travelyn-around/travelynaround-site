@@ -1,1 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blood on the Clocktower – Signup</title>
+<style>
+  :root { --bg:#14100f; --card:#211a18; --line:#3a2e2a; --text:#f1e9e2; --muted:#a99c92; --red:#b3262e; --gold:#d9a441; --green:#2e7d4f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:Georgia,'Times New Roman',serif; line-height:1.5; }
+  .wrap { max-width:960px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { margin:0 0 4px; font-size:2rem; color:var(--gold); }
+  .sub { color:var(--muted); margin:0 0 16px; }
+  .info { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:16px; }
+  .info a { color:var(--gold); }
+  .name-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:6px; }
+  .name-row label { font-weight:bold; }
+  input[type=text] { flex:1; min-width:200px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:#0f0b0a; color:var(--text); font-size:1rem; }
+  .msg { min-height:1.4em; margin:6px 0 16px; font-size:.95rem; }
+  .msg.err { color:#ff8a80; } .msg.ok { color:#8be0a8; }
+  .games { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
+  .game { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .game h2 { margin:0; color:var(--gold); }
+  .count { color:var(--muted); font-size:.9rem; margin-bottom:10px; }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  button { cursor:pointer; border:0; border-radius:8px; padding:9px 14px; font-size:.95rem; font-family:inherit; color:#fff; background:var(--green); }
+  button.st { background:var(--red); }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  button.rm { background:transparent; color:var(--muted); border:1px solid var(--line); padding:3px 9px; font-size:.8rem; }
+  ol { list-style:none; margin:0; padding:0; }
+  li { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; border-bottom:1px solid var(--line); min-height:38px; }
+  li .n { color:var(--muted); width:1.8em; display:inline-block; }
+  li.empty .who { color:#5d514b; font-style:italic; }
+  li.story { background:#2c1b1b; border-radius:8px; border:1px solid var(--red); margin-bottom:8px; }
+  li.mine .who { color:var(--gold); font-weight:bold; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🕰️ Blood on the Clocktower</h1>
+  <p class="sub">Sign up for one game or both!</p>
 
+  <div class="info">
+    <strong>Thursday, December 10 · 6:15 PM</strong><br>
+    Scavenger, Bridgeland, Calgary ·
+    <a href="https://www.google.com/maps/search/?api=1&query=Scavenger+Bridgeland+Calgary" target="_blank" rel="noopener">Open in Google Maps</a>
+  </div>
+
+  <div class="name-row">
+    <label for="name">Your name:</label>
+    <input type="text" id="name" maxlength="40" placeholder="Type your name, then pick a game below">
+  </div>
+  <div class="msg" id="msg"></div>
+
+  <div class="games" id="games"></div>
+</div>
+
+<script>
+// ====== EDIT THESE TWO LINES (from Supabase: Project Settings > API) ======
+const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';   // e.g. https://abcdxyz.supabase.co
+const SUPABASE_KEY = 'PASTE_YOUR_ANON_OR_PUBLISHABLE_KEY_HERE';
+// ===========================================================================
+
+const MAX_PLAYERS = 15;   // also set inside supabase-setup.sql
+const GAMES = [1, 2];
+const H = { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' };
+
+function safeGet(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } }
+function safeSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+let token = safeGet('botc_token', null);
+if (!token) { token = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); safeSet('botc_token', token); }
+let mine = safeGet('botc_mine', []);
+let rows = [];
+
+const nameEl = document.getElementById('name');
+const msgEl = document.getElementById('msg');
+nameEl.value = safeGet('botc_name', '');
+nameEl.addEventListener('input', () => safeSet('botc_name', nameEl.value));
+
+function say(text, kind) { msgEl.textContent = text; msgEl.className = 'msg ' + (kind || ''); }
+
+async function load() {
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/botc_signups_public?select=*&order=created_at.asc', { headers: H });
+    if (!r.ok) throw new Error(r.status);
+    rows = await r.json();
+    render();
+  } catch (e) { say('Could not load the list. Try refreshing the page.', 'err'); }
+}
+
+async function signup(game, role) {
+  const name = nameEl.value.trim();
+  if (!name) { say('Please type your name first.', 'err'); nameEl.focus(); return; }
+  say('Saving…');
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/botc_signup', {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_game: game, p_role: role, p_name: name, p_token: token })
+    });
+    const res = await r.json();
+    if (res.status === 'ok') {
+      mine.push(res.id); safeSet('botc_mine', mine);
+      say('You\u2019re in for Game ' + game + '! 🎉', 'ok');
+    } else if (res.status === 'duplicate') say('That name is already on Game ' + game + '.', 'err');
+    else if (res.status === 'full') say('Sorry, that spot just filled up.', 'err');
+    else say('Something went wrong. Please try again.', 'err');
+  } catch (e) { say('Something went wrong. Please try again.', 'err'); }
+  load();
+}
+
+async function removeMe(id) {
+  if (!confirm('Remove your name from this game?')) return;
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/rpc/botc_remove', {
+      method: 'POST', headers: H, body: JSON.stringify({ p_id: id, p_token: token })
+    });
+    mine = mine.filter(x => x !== id); safeSet('botc_mine', mine);
+    say('Removed.', 'ok');
+  } catch (e) { say('Could not remove. Try again.', 'err'); }
+  load();
+}
+
+function row(cls, label, person) {
+  const li = document.createElement('li');
+  li.className = cls + (person && mine.includes(person.id) ? ' mine' : '');
+  const left = document.createElement('span');
+  const n = document.createElement('span'); n.className = 'n'; n.textContent = label;
+  const who = document.createElement('span'); who.className = 'who';
+  who.textContent = person ? person.name : 'Open';
+  left.append(n, who); li.append(left);
+  if (person && mine.includes(person.id)) {
+    const b = document.createElement('button'); b.className = 'rm'; b.textContent = 'Remove';
+    b.onclick = () => removeMe(person.id); li.append(b);
+  }
+  return li;
+}
+
+function render() {
+  const box = document.getElementById('games');
+  box.innerHTML = '';
+  GAMES.forEach(g => {
+    const list = rows.filter(r => r.game === g);
+    const players = list.filter(r => r.role === 'player');
+    const st = list.find(r => r.role === 'storyteller');
+    const card = document.createElement('div'); card.className = 'game';
+    card.innerHTML = '<h2>Game ' + g + '</h2><div class="count">' + players.length + ' / ' + MAX_PLAYERS + ' players</div>';
+
+    const btns = document.createElement('div'); btns.className = 'btns';
+    const bp = document.createElement('button'); bp.textContent = 'Join as player';
+    bp.disabled = players.length >= MAX_PLAYERS; bp.onclick = () => signup(g, 'player');
+    const bs = document.createElement('button'); bs.className = 'st'; bs.textContent = 'Be the Storyteller';
+    bs.disabled = !!st; bs.onclick = () => signup(g, 'storyteller');
+    btns.append(bp, bs); card.append(btns);
+
+    const ol = document.createElement('ol');
+    const sli = row('story' + (st ? '' : ' empty'), '🎭', st);
+    sli.querySelector('.who').textContent = st ? st.name + ' (Storyteller)' : 'Storyteller spot open';
+    ol.append(sli);
+    for (let i = 0; i < MAX_PLAYERS; i++) {
+      const p = players[i];
+      ol.append(row(p ? '' : 'empty', (i + 1) + '.', p));
+    }
+    card.append(ol); box.append(card);
+  });
+}
+
+render();
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>
