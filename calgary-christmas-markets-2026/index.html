@@ -111,8 +111,17 @@
   .box .cancel { background:#eee; }
   #formMsg { color:var(--red); font-size:.85rem; margin-top:8px; min-height:1em; }
   footer { padding:8px 16px; font-size:.75rem; color:var(--muted); }
+  .leaflet-popup-content a.mob-only { display:none; }
   @media (max-width: 760px) {
-    main { grid-template-columns: 1fr; grid-template-rows: 45vh auto; height:auto; }
+    main { grid-template-columns: 1fr; grid-template-rows: 50vh auto; height:auto; }
+    .leaflet-popup-content-wrapper { border-radius:10px; border-top-width:4px; }
+    .leaflet-popup-content { margin:8px 30px 8px 10px; font-size:.78rem; line-height:1.35; }
+    .leaflet-popup-content strong { font-size:.9rem; }
+    .leaflet-popup-content img.thumb { display:none; }
+    .leaflet-popup-content a { font-size:.75rem; padding:4px 10px; margin:4px 2px 0 0; }
+    .leaflet-popup-content a.mob-only { display:inline-block; }
+    .leaflet-popup-content .desk-only { display:none; }
+    .leaflet-container a.leaflet-popup-close-button { width:36px; height:36px; font:26px/32px Tahoma, Verdana, sans-serif; }
     #map { order:-1; }
     #list { border-right:0; max-height:none; }
   }
@@ -471,6 +480,11 @@ function focusMarket(m, marker) {
   setTimeout(refit, 150);
   setTimeout(refit, 600);
 }
+function showInList(id, ev) {
+  ev.preventDefault(); ev.stopPropagation();
+  const hit = markerById[id];
+  if (hit && hit.el) hit.el.scrollIntoView({ behavior:'smooth', block:'center' });
+}
 function openFromHash() {
   const hit = markerById[decodeURIComponent(location.hash.slice(1))];
   if (!hit) return;
@@ -478,7 +492,7 @@ function openFromHash() {
   focusMarket(hit.m, hit.marker);
 }
 function popupHtml(m) {
-  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> ${calLink(m, '📆 Add to calendar')} ${shareBtn(m)} <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
+  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> <span class="desk-only">${calLink(m, '📆 Add to calendar')}</span> ${shareBtn(m)} <a href="#" class="mob-only" onclick="showInList('${slug(m)}', event)">↓ See in list</a> <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
 }
 
 function render() {
@@ -495,10 +509,11 @@ function render() {
   const list = document.getElementById('list');
   list.innerHTML = '';
   upcoming.forEach(m => {
-    const marker = L.marker([m.lat, m.lng], { icon }).bindPopup(popupHtml(m), { autoPanPadding:[30,30] }).addTo(layer);
+    const marker = L.marker([m.lat, m.lng], { icon }).bindPopup(popupHtml(m), { autoPanPadding:[30,30], maxWidth: window.innerWidth <= 760 ? 220 : 300 }).addTo(layer);
     markerById[slug(m)] = { marker, m };
     const el = document.createElement('div');
     el.className = 'item';
+    markerById[slug(m)].el = el;
     el.innerHTML = `${thumb(m)}<h3>${m.name}</h3>
       <div class="meta">📅 ${whenText(m)}<br>🕒 ${m.time}<br>📍 ${placeLink(m)}</div>
       <span class="tag ${/^free/i.test(m.cost) ? '' : 'paid'}">${m.cost}</span>
