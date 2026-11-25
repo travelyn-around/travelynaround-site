@@ -117,10 +117,10 @@
     .leaflet-popup-content-wrapper { border-radius:10px; border-top-width:4px; }
     .leaflet-popup-content { margin:8px 30px 8px 10px; font-size:.78rem; line-height:1.35; }
     .leaflet-popup-content strong { font-size:.9rem; }
-    .leaflet-popup-content img.thumb { display:none; }
+    .leaflet-popup-content img.thumb { max-height:110px; margin-bottom:6px; }
+    .rc-label { display:none; }
     .leaflet-popup-content a { font-size:.75rem; padding:4px 10px; margin:4px 2px 0 0; }
     .leaflet-popup-content a.mob-only { display:inline-block; }
-    .leaflet-popup-content .desk-only { display:none; }
     .leaflet-container a.leaflet-popup-close-button { width:36px; height:36px; font:26px/32px Tahoma, Verdana, sans-serif; }
     #map { order:-1; }
     #list { border-right:0; max-height:none; }
@@ -391,7 +391,7 @@ const Recentre = L.Control.extend({
   onAdd: function () {
     const box = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
     const b = L.DomUtil.create('button', 'recentre-btn', box);
-    b.type = 'button'; b.title = 'Re-centre the map'; b.textContent = '⌖ Re-centre';
+    b.type = 'button'; b.title = 'Re-centre the map'; b.innerHTML = '⌖<span class="rc-label"> Re-centre</span>';
     L.DomEvent.disableClickPropagation(box);
     b.onclick = () => {
       map.closePopup();
@@ -492,7 +492,7 @@ function openFromHash() {
   focusMarket(hit.m, hit.marker);
 }
 function popupHtml(m) {
-  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Official page →</a> <span class="desk-only">${calLink(m, '📆 Add to calendar')}</span> ${shareBtn(m)} <a href="#" class="mob-only" onclick="showInList('${slug(m)}', event)">↓ See in list</a> <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
+  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Page →</a> ${calLink(m, '📆 Calendar')} ${shareBtn(m)} <a href="#" class="mob-only" onclick="showInList('${slug(m)}', event)">↓ List</a> <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
 }
 
 function render() {
