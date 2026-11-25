@@ -4,71 +4,74 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blood on the Clocktower – Signup</title>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#1b1030; --card:rgba(32,19,56,.9); --line:#6b5a2e; --text:#efe8f7; --muted:#b8a9cc; --red:#b3262e; --gold:#e0b84f; --green:#2e7d4f; }
+  :root { --bg:#1b1030; --card:rgba(32,19,56,.9); --line:#6b5a2e; --text:#efe8f7; --muted:#b8a9cc; --red:#b3262e; --gold:#e0b84f; --blue:#2b6fd1; }
   * { box-sizing: border-box; }
   body { margin:0; color:var(--text); font-family:Georgia,'Times New Roman',serif; line-height:1.5; min-height:100vh;
     background: radial-gradient(ellipse at 30% 20%, #5a3f8c 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, #3a2466 0%, transparent 60%), radial-gradient(circle at 60% 40%, rgba(120,20,40,.25) 0%, transparent 40%), var(--bg);
     background-attachment: fixed; }
   body::before { content:''; position:fixed; inset:8px; border:2px solid var(--gold); outline:1px solid var(--line); outline-offset:4px; border-radius:4px; pointer-events:none; opacity:.7; }
-  .banner { display:flex; align-items:center; justify-content:center; gap:14px; background:#4f1832; border:1px solid #8a3a5c; border-radius:12px; padding:14px; margin-bottom:20px; text-decoration:none; color:#f6e9ee; text-align:center; }
-  .banner img { height:56px; }
-  .banner strong { display:block; font-size:1.4rem; letter-spacing:.12em; text-transform:uppercase; }
-  .banner small { color:#e7b9c9; }
-  .wrap { max-width:960px; margin:0 auto; padding:24px 16px 48px; }
-  h1 { margin:0 0 4px; font-size:2rem; color:var(--gold); }
-  .sub { color:var(--muted); margin:0 0 16px; }
-  .info { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:16px; }
-  .info a { color:var(--gold); }
-  .name-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:6px; }
-  .name-row label { font-weight:bold; }
-  input[type=text] { flex:1; min-width:200px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:#120a22; color:var(--text); font-size:1rem; }
-  .msg { min-height:1.4em; margin:6px 0 16px; font-size:.95rem; }
+  .wrap { max-width:960px; margin:0 auto; padding:28px 16px 48px; }
+
+  .logo { font-family:'UnifrakturCook','Old English Text MT',Georgia,serif; font-weight:700; text-align:center; margin:0 0 8px; line-height:.95;
+    font-variant-ligatures:none; font-feature-settings:"liga" 0,"clig" 0,"dlig" 0,"calt" 0; }
+  .logo span { display:block; background:linear-gradient(180deg,#fff0b8 0%,#e0b84f 45%,#9a6a1c 100%); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 2px 2px rgba(0,0,0,.7)); }
+  .logo .b { font-size:4.2rem; } .logo .o { font-size:1.1rem; margin:-2px 0 -6px; } .logo .c { font-size:3.2rem; }
+  .sub { text-align:center; color:var(--muted); margin:0 0 16px; }
+
+  .info { display:flex; align-items:center; gap:14px; background:#4f1832; border:1px solid #8a3a5c; border-radius:12px; padding:14px 16px; margin-bottom:12px; color:#f6e9ee; }
+  .info a { color:#f6c6d8; }
+  .bird { width:64px; height:64px; flex:none; border-radius:50%; object-fit:cover; background:#fff; }
+
+  .msg { min-height:1.4em; margin:6px 0 14px; font-size:.95rem; text-align:center; }
   .msg.err { color:#ff8a80; } .msg.ok { color:#8be0a8; }
-  .games { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
+
+  .games { display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:16px; }
   .game { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
   .game h2 { margin:0; color:var(--gold); }
   .count { color:var(--muted); font-size:.9rem; margin-bottom:10px; }
-  .btns { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
-  button { cursor:pointer; border:0; border-radius:8px; padding:9px 14px; font-size:.95rem; font-family:inherit; color:#fff; background:var(--green); }
-  button.st { background:var(--red); }
-  button:disabled { opacity:.4; cursor:not-allowed; }
-  button.rm { background:transparent; color:var(--muted); border:1px solid var(--line); padding:3px 9px; font-size:.8rem; }
   ol { list-style:none; margin:0; padding:0; }
-  li { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; border-bottom:1px solid var(--line); min-height:38px; }
-  li .n { color:var(--muted); width:1.8em; display:inline-block; }
-  li.empty .who { color:#8a7aa6; font-style:italic; }
-  li.story { background:#2c1b1b; border-radius:8px; border:1px solid var(--red); margin-bottom:8px; }
+  li { display:flex; align-items:center; gap:10px; padding:6px 4px; border-bottom:1px solid rgba(107,90,46,.5); min-height:46px; }
+  li .who { flex:1; min-width:0; overflow-wrap:anywhere; }
   li.mine .who { color:var(--gold); font-weight:bold; }
+
+  /* little character tokens */
+  .tok { flex:none; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.95rem;
+    background:radial-gradient(circle at 35% 30%, #fbf1d9 0%, #eadbb6 60%, #cdb68a 100%); box-shadow:0 0 0 2px #cdb68a, 0 2px 4px rgba(0,0,0,.5); }
+  .g1 .tok { color:#1f5fc4; border:2px solid #86aee8; }
+  .g2 .tok { color:#a3202a; border:2px solid #dc9196; }
+  li.empty .tok { opacity:.8; }
+  li.story .tok { color:#6b4a12; border:2px solid #b8903a; font-size:.75rem; }
+  li.story .who { color:var(--gold); }
+
+  .slot-input { flex:1; min-width:0; padding:7px 10px; border-radius:8px; border:1px solid var(--line); background:#120a22; color:var(--text); font-size:.95rem; font-family:inherit; }
+  button { cursor:pointer; border:0; border-radius:8px; padding:7px 14px; font-size:.9rem; font-family:inherit; color:#fff; }
+  .g1 button.join { background:var(--blue); } .g2 button.join { background:var(--red); }
+  button.rm { background:transparent; color:var(--muted); border:1px solid var(--line); padding:3px 9px; font-size:.8rem; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <a class="banner" href="https://scavengeryyc.com" target="_blank" rel="noopener">
-    <img src="scavenger-logo.png" alt="" onerror="this.style.display='none'">
-    <span><strong>Scavenger Secondhand</strong><small>Bridgeland · Calgary</small></span>
-  </a>
-  <h1>🕰️ Blood on the Clocktower</h1>
-  <p class="sub">Sign up for one game or both!</p>
+  <h1 class="logo"><span class="b">Blood</span><span class="o">on the</span><span class="c">Cloc&zwnj;ktower</span></h1>
+  <p class="sub">Sign up for one game or both! Type your name in an open slot.</p>
 
   <div class="info">
-    <strong>Thursday, December 10 · 6:15 PM</strong><br>
-    Scavenger, Bridgeland, Calgary ·
-    <a href="https://maps.app.goo.gl/wK3h9e7VFiAH6idm7" target="_blank" rel="noopener">Open in Google Maps</a>
+    <img class="bird" src="scavenger-logo.png" alt="Scavenger logo" onerror="this.style.display='none'">
+    <div>
+      <strong>Thursday, December 10 · 6:15 PM</strong><br>
+      Scavenger Secondhand · Bridgeland, Calgary<br>
+      <a href="https://maps.app.goo.gl/wK3h9e7VFiAH6idm7" target="_blank" rel="noopener">Open in Google Maps</a>
+    </div>
   </div>
 
-  <div class="name-row">
-    <label for="name">Your name:</label>
-    <input type="text" id="name" maxlength="40" placeholder="Type your name, then pick a game below">
-  </div>
-  <div class="msg" id="msg"></div>
-
+  <div class="msg" id="msg">Loading…</div>
   <div class="games" id="games"></div>
 </div>
 
 <script>
-// ====== EDIT THESE TWO LINES (from Supabase: Project Settings > API) ======
-const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';   // e.g. https://abcdxyz.supabase.co
+// ====== EDIT THE KEY LINE (from Supabase: Project Settings > API Keys) ======
+const SUPABASE_URL = 'https://gbwboqojdrxmvijdihsv.supabase.co';
 const SUPABASE_KEY = 'PASTE_YOUR_ANON_OR_PUBLISHABLE_KEY_HERE';
 // ===========================================================================
 
@@ -83,41 +86,46 @@ let token = safeGet('botc_token', null);
 if (!token) { token = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); safeSet('botc_token', token); }
 let mine = safeGet('botc_mine', []);
 let rows = [];
-
-const nameEl = document.getElementById('name');
 const msgEl = document.getElementById('msg');
-nameEl.value = safeGet('botc_name', '');
-nameEl.addEventListener('input', () => safeSet('botc_name', nameEl.value));
 
 function say(text, kind) { msgEl.textContent = text; msgEl.className = 'msg ' + (kind || ''); }
 
-async function load() {
+// true while someone is typing, so the 30-second refresh doesn't wipe what they typed
+function typing() {
+  const a = document.activeElement;
+  if (a && a.classList && a.classList.contains('slot-input')) return true;
+  return [...document.querySelectorAll('.slot-input')].some(i => i.value.trim());
+}
+
+async function load(force) {
   try {
     const r = await fetch(SUPABASE_URL + '/rest/v1/botc_signups_public?select=*&order=created_at.asc', { headers: H });
     if (!r.ok) throw new Error(r.status);
     rows = await r.json();
-    render();
+    if (msgEl.textContent === 'Loading…') say('');
+    if (force || !typing()) render();
   } catch (e) { say('Could not load the list. Try refreshing the page.', 'err'); }
 }
 
-async function signup(game, role) {
-  const name = nameEl.value.trim();
-  if (!name) { say('Please type your name first.', 'err'); nameEl.focus(); return; }
+async function signup(game, input) {
+  const name = input.value.trim();
+  if (!name) { say('Please type your name in the slot first.', 'err'); input.focus(); return; }
   say('Saving…');
+  let reload = true;
   try {
     const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/botc_signup', {
       method: 'POST', headers: H,
-      body: JSON.stringify({ p_game: game, p_role: role, p_name: name, p_token: token })
+      body: JSON.stringify({ p_game: game, p_role: 'player', p_name: name, p_token: token })
     });
     const res = await r.json();
     if (res.status === 'ok') {
-      mine.push(res.id); safeSet('botc_mine', mine);
+      mine.push(res.id); safeSet('botc_mine', mine); input.value = '';
       say('You\u2019re in for Game ' + game + '! 🎉', 'ok');
-    } else if (res.status === 'duplicate') say('That name is already on Game ' + game + '.', 'err');
+    } else if (res.status === 'duplicate') { say('That name is already on Game ' + game + '.', 'err'); reload = false; }
     else if (res.status === 'full') say('Sorry, that spot just filled up.', 'err');
-    else say('Something went wrong. Please try again.', 'err');
-  } catch (e) { say('Something went wrong. Please try again.', 'err'); }
-  load();
+    else { say('Something went wrong. Please try again.', 'err'); reload = false; }
+  } catch (e) { say('Something went wrong. Please try again.', 'err'); reload = false; }
+  load(reload);
 }
 
 async function removeMe(id) {
@@ -129,20 +137,29 @@ async function removeMe(id) {
     mine = mine.filter(x => x !== id); safeSet('botc_mine', mine);
     say('Removed.', 'ok');
   } catch (e) { say('Could not remove. Try again.', 'err'); }
-  load();
+  load(true);
 }
 
-function row(cls, label, person) {
+function slot(g, n, p) {
   const li = document.createElement('li');
-  li.className = cls + (person && mine.includes(person.id) ? ' mine' : '');
-  const left = document.createElement('span');
-  const n = document.createElement('span'); n.className = 'n'; n.textContent = label;
-  const who = document.createElement('span'); who.className = 'who';
-  who.textContent = person ? person.name : 'Open';
-  left.append(n, who); li.append(left);
-  if (person && mine.includes(person.id)) {
-    const b = document.createElement('button'); b.className = 'rm'; b.textContent = 'Remove';
-    b.onclick = () => removeMe(person.id); li.append(b);
+  const isMine = p && mine.includes(p.id);
+  li.className = (p ? '' : 'empty') + (isMine ? ' mine' : '');
+  const tok = document.createElement('span'); tok.className = 'tok'; tok.textContent = n;
+  li.append(tok);
+  if (p) {
+    const who = document.createElement('span'); who.className = 'who'; who.textContent = p.name; li.append(who);
+    if (isMine) {
+      const b = document.createElement('button'); b.className = 'rm'; b.textContent = 'Remove';
+      b.onclick = () => removeMe(p.id); li.append(b);
+    }
+  } else {
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.className = 'slot-input'; inp.maxLength = 40;
+    inp.placeholder = 'Type your name to join'; inp.setAttribute('aria-label', 'Your name for Game ' + g + ', slot ' + n);
+    const b = document.createElement('button'); b.className = 'join'; b.textContent = 'Join';
+    b.onclick = () => signup(g, inp);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') signup(g, inp); });
+    li.append(inp, b);
   }
   return li;
 }
@@ -154,29 +171,23 @@ function render() {
     const list = rows.filter(r => r.game === g);
     const players = list.filter(r => r.role === 'player');
     const st = list.find(r => r.role === 'storyteller');
-    const card = document.createElement('div'); card.className = 'game';
+    const card = document.createElement('div'); card.className = 'game g' + g;
     card.innerHTML = '<h2>Game ' + g + '</h2><div class="count">' + players.length + ' / ' + MAX_PLAYERS + ' players</div>';
-
-    const btns = document.createElement('div'); btns.className = 'btns';
-    const bp = document.createElement('button'); bp.textContent = 'Join as player';
-    bp.disabled = players.length >= MAX_PLAYERS; bp.onclick = () => signup(g, 'player');
-    btns.append(bp); card.append(btns);
-
     const ol = document.createElement('ol');
-    const sli = row('story' + (st ? '' : ' empty'), '🎭', st);
-    sli.querySelector('.who').textContent = st ? st.name + ' (Storyteller)' : 'Storyteller spot open';
-    ol.append(sli);
-    for (let i = 0; i < MAX_PLAYERS; i++) {
-      const p = players[i];
-      ol.append(row(p ? '' : 'empty', (i + 1) + '.', p));
-    }
+
+    const sli = document.createElement('li'); sli.className = 'story';
+    const stok = document.createElement('span'); stok.className = 'tok'; stok.textContent = 'ST';
+    const swho = document.createElement('span'); swho.className = 'who';
+    swho.textContent = st ? 'Storyteller: ' + st.name : 'Storyteller spot open';
+    sli.append(stok, swho); ol.append(sli);
+
+    for (let i = 0; i < MAX_PLAYERS; i++) ol.append(slot(g, i + 1, players[i]));
     card.append(ol); box.append(card);
   });
 }
 
-render();
-load();
-setInterval(load, 30000);
+load(true);
+setInterval(() => load(false), 30000);
 </script>
 </body>
 </html>
