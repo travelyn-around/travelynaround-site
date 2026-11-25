@@ -112,6 +112,10 @@
   #formMsg { color:var(--red); font-size:.85rem; margin-top:8px; min-height:1em; }
   footer { padding:8px 16px; font-size:.75rem; color:var(--muted); }
   .leaflet-popup-content a.mob-only { display:none; }
+  .leaflet-popup-content img.thumb { cursor:zoom-in; }
+  .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:6000; display:flex; align-items:center; justify-content:center; padding:16px; cursor:zoom-out; }
+  .lightbox img { max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; }
+  .lightbox b { position:absolute; top:10px; right:16px; color:#fff; font-size:2rem; line-height:1; }
   @media (max-width: 760px) {
     main { grid-template-columns: 1fr; grid-template-rows: 50vh auto; height:auto; }
     .leaflet-popup-content-wrapper { border-radius:10px; border-top-width:4px; }
@@ -480,6 +484,19 @@ function focusMarket(m, marker) {
   setTimeout(refit, 150);
   setTimeout(refit, 600);
 }
+// Click the picture in a popup to see it full size (click anywhere or press Esc to close)
+document.addEventListener('click', e => {
+  const img = e.target.closest('.leaflet-popup-content img.thumb');
+  if (!img) return;
+  const box = document.createElement('div');
+  box.className = 'lightbox';
+  box.innerHTML = '<b>×</b><img src="' + img.src + '" alt="">';
+  const close = () => { box.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = k => { if (k.key === 'Escape') close(); };
+  box.onclick = close;
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(box);
+}, true);
 function showInList(id, ev) {
   ev.preventDefault(); ev.stopPropagation();
   const hit = markerById[id];
@@ -492,7 +509,7 @@ function openFromHash() {
   focusMarket(hit.m, hit.marker);
 }
 function popupHtml(m) {
-  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Page →</a> ${calLink(m, '📆 Calendar')} ${shareBtn(m)} <a href="#" class="mob-only" onclick="showInList('${slug(m)}', event)">↓ List</a> <a href="#" class="rep" data-name="${encodeURIComponent(m.name)}">Report an error</a>`;
+  return `${thumb(m)}<strong>${m.name}</strong><br>${whenText(m)}<br>${m.time}<br>📍 ${placeLink(m)}<br>${m.cost}<br><a href="${m.url}" target="_blank" rel="noopener">Link →</a> ${calLink(m, '📆 Add')} ${shareBtn(m)} <a href="#" class="mob-only" onclick="showInList('${slug(m)}', event)">↓ See in list</a>`;
 }
 
 function render() {
