@@ -19,17 +19,18 @@
     font-variant-ligatures:none; font-feature-settings:"liga" 0,"clig" 0,"dlig" 0,"calt" 0; }
   .logo span { display:block; background:linear-gradient(180deg,#fff0b8 0%,#e0b84f 45%,#9a6a1c 100%); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 2px 2px rgba(0,0,0,.7)); }
   .logo .b { font-size:4.2rem; } .logo .o { font-size:1.1rem; margin:-2px 0 -6px; } .logo .c { font-size:3.2rem; font-family:'Pirata One','Old English Text MT',Georgia,serif; font-weight:400; }
-  .sub { text-align:center; color:var(--muted); font-size:1.05rem; margin:8px 0 0; }
+  .sub { text-align:center; color:var(--muted); font-size:1.05rem; margin:22px 0 12px; }
 
-  .info { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:16px; background:#4f1832; border:1px solid #8a3a5c; border-radius:12px; padding:14px; margin-bottom:12px; color:#f6e9ee; }
+  .info { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:16px; width:fit-content; max-width:100%; margin:0 auto; background:#4f1832; border:1px solid #8a3a5c; border-radius:12px; padding:14px; margin-bottom:12px; color:#f6e9ee; }
   .info a { color:#f6c6d8; }
   .photo { width:200px; max-width:100%; border-radius:10px; border:1px solid #8a3a5c; }
-  .where { display:flex; align-items:center; justify-content:center; gap:14px; flex:1; min-width:230px; }
+  .where { display:flex; align-items:center; justify-content:center; gap:14px; flex:0 1 auto; }
   .place { font-size:1.3rem; font-weight:bold; margin-bottom:2px; }
   .bird { width:64px; height:64px; flex:none; border-radius:50%; object-fit:cover; background:#fff; }
   .when { text-align:center; color:var(--gold); font-size:1.35rem; font-weight:bold; letter-spacing:.04em; margin:0 0 16px; }
 
-  .msg { min-height:1.4em; margin:6px 0 14px; font-size:.95rem; text-align:center; }
+  .msg { margin:6px 0 12px; font-size:.95rem; text-align:center; }
+  .msg:empty { display:none; }
   .msg.err { color:#ff8a80; } .msg.ok { color:#8be0a8; }
 
   .games { display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:16px; }
