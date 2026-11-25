@@ -5,9 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blood on the Clocktower – Signup</title>
 <style>
-  :root { --bg:#14100f; --card:#211a18; --line:#3a2e2a; --text:#f1e9e2; --muted:#a99c92; --red:#b3262e; --gold:#d9a441; --green:#2e7d4f; }
+  :root { --bg:#1b1030; --card:rgba(32,19,56,.9); --line:#6b5a2e; --text:#efe8f7; --muted:#b8a9cc; --red:#b3262e; --gold:#e0b84f; --green:#2e7d4f; }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--text); font-family:Georgia,'Times New Roman',serif; line-height:1.5; }
+  body { margin:0; color:var(--text); font-family:Georgia,'Times New Roman',serif; line-height:1.5; min-height:100vh;
+    background: radial-gradient(ellipse at 30% 20%, #5a3f8c 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, #3a2466 0%, transparent 60%), radial-gradient(circle at 60% 40%, rgba(120,20,40,.25) 0%, transparent 40%), var(--bg);
+    background-attachment: fixed; }
+  body::before { content:''; position:fixed; inset:8px; border:2px solid var(--gold); outline:1px solid var(--line); outline-offset:4px; border-radius:4px; pointer-events:none; opacity:.7; }
+  .banner { display:flex; align-items:center; justify-content:center; gap:14px; background:#4f1832; border:1px solid #8a3a5c; border-radius:12px; padding:14px; margin-bottom:20px; text-decoration:none; color:#f6e9ee; text-align:center; }
+  .banner img { height:56px; }
+  .banner strong { display:block; font-size:1.4rem; letter-spacing:.12em; text-transform:uppercase; }
+  .banner small { color:#e7b9c9; }
   .wrap { max-width:960px; margin:0 auto; padding:24px 16px 48px; }
   h1 { margin:0 0 4px; font-size:2rem; color:var(--gold); }
   .sub { color:var(--muted); margin:0 0 16px; }
@@ -15,7 +22,7 @@
   .info a { color:var(--gold); }
   .name-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:6px; }
   .name-row label { font-weight:bold; }
-  input[type=text] { flex:1; min-width:200px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:#0f0b0a; color:var(--text); font-size:1rem; }
+  input[type=text] { flex:1; min-width:200px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:#120a22; color:var(--text); font-size:1rem; }
   .msg { min-height:1.4em; margin:6px 0 16px; font-size:.95rem; }
   .msg.err { color:#ff8a80; } .msg.ok { color:#8be0a8; }
   .games { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
@@ -30,20 +37,24 @@
   ol { list-style:none; margin:0; padding:0; }
   li { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; border-bottom:1px solid var(--line); min-height:38px; }
   li .n { color:var(--muted); width:1.8em; display:inline-block; }
-  li.empty .who { color:#5d514b; font-style:italic; }
+  li.empty .who { color:#8a7aa6; font-style:italic; }
   li.story { background:#2c1b1b; border-radius:8px; border:1px solid var(--red); margin-bottom:8px; }
   li.mine .who { color:var(--gold); font-weight:bold; }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <a class="banner" href="https://scavengeryyc.com" target="_blank" rel="noopener">
+    <img src="scavenger-logo.png" alt="" onerror="this.style.display='none'">
+    <span><strong>Scavenger Secondhand</strong><small>Bridgeland · Calgary</small></span>
+  </a>
   <h1>🕰️ Blood on the Clocktower</h1>
   <p class="sub">Sign up for one game or both!</p>
 
   <div class="info">
     <strong>Thursday, December 10 · 6:15 PM</strong><br>
     Scavenger, Bridgeland, Calgary ·
-    <a href="https://www.google.com/maps/search/?api=1&query=Scavenger+Bridgeland+Calgary" target="_blank" rel="noopener">Open in Google Maps</a>
+    <a href="https://maps.app.goo.gl/wK3h9e7VFiAH6idm7" target="_blank" rel="noopener">Open in Google Maps</a>
   </div>
 
   <div class="name-row">
@@ -57,8 +68,8 @@
 
 <script>
 // ====== EDIT THESE TWO LINES (from Supabase: Project Settings > API) ======
-const SUPABASE_URL = 'https://gbwboqojdrxmvijdihsv.supabase.co/';   // e.g. https://abcdxyz.supabase.co
-const SUPABASE_KEY = 'sb_publishable_4wTwT-IkakwrFBHNqFDmmA_mVVHLSMg';
+const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';   // e.g. https://abcdxyz.supabase.co
+const SUPABASE_KEY = 'PASTE_YOUR_ANON_OR_PUBLISHABLE_KEY_HERE';
 // ===========================================================================
 
 const MAX_PLAYERS = 15;   // also set inside supabase-setup.sql
@@ -149,9 +160,7 @@ function render() {
     const btns = document.createElement('div'); btns.className = 'btns';
     const bp = document.createElement('button'); bp.textContent = 'Join as player';
     bp.disabled = players.length >= MAX_PLAYERS; bp.onclick = () => signup(g, 'player');
-    const bs = document.createElement('button'); bs.className = 'st'; bs.textContent = 'Be the Storyteller';
-    bs.disabled = !!st; bs.onclick = () => signup(g, 'storyteller');
-    btns.append(bp, bs); card.append(btns);
+    btns.append(bp); card.append(btns);
 
     const ol = document.createElement('ol');
     const sli = row('story' + (st ? '' : ' empty'), '🎭', st);
