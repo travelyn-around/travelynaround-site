@@ -36,6 +36,7 @@
   .games { display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:16px; }
   .game { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
   .game h2 { margin:0; color:var(--gold); }
+  .time { color:#f0d9a0; font-size:1rem; }
   .count { color:var(--muted); font-size:.9rem; margin-bottom:10px; }
   ol { list-style:none; margin:0; padding:0; }
   li { display:flex; align-items:center; gap:10px; padding:6px 4px; border-bottom:1px solid rgba(107,90,46,.5); min-height:46px; }
@@ -86,6 +87,7 @@ const SUPABASE_KEY = 'sb_publishable_4wTwT-IkakwrFBHNqFDmmA_mVVHLSMg';
 
 const MAX_PLAYERS = 15;   // also set inside supabase-setup.sql
 const GAMES = [1, 2];
+const TIMES = { 1: '6:15 PM – ~8:30 PM', 2: '8:45 PM – ~11 PM' };
 const H = { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' };
 
 function safeGet(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } }
@@ -181,7 +183,7 @@ function render() {
     const players = list.filter(r => r.role === 'player');
     const st = list.find(r => r.role === 'storyteller');
     const card = document.createElement('div'); card.className = 'game g' + g;
-    card.innerHTML = '<h2>Game ' + g + '</h2><div class="count">' + players.length + ' / ' + MAX_PLAYERS + ' players</div>';
+    card.innerHTML = '<h2>Game ' + g + '</h2><div class="time">' + TIMES[g] + '</div><div class="count">' + players.length + ' / ' + MAX_PLAYERS + ' players</div>';
     const ol = document.createElement('ol');
 
     ol.append(slot(g, 'ST', st, 'storyteller'));
